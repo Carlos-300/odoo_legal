@@ -1,0 +1,2046 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <record id="paperformat_cl_letter_legal_juicio" model="report.paperformat">
+            <field name="name">CL Letter juicio</field>
+            <field name="default" eval="True"/>
+            <field name="format">Letter</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">20</field>
+            <field name="margin_bottom">20</field>
+            <field name="margin_left">15</field>
+            <field name="margin_right">15</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">0</field> 
+            <field name="dpi">100</field>
+            
+        </record> 
+
+
+        <record id="action_report_juicio" model="ir.actions.report">
+            <field name="name">Imprimir - Registro</field>
+            <field name="model">legal.juicio</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">l10n_cl_legal_contratos.report_juicio</field>
+            <field name="report_file">l10n_cl_legal_contratos.report_juicio</field>
+            <field name="print_report_name">('Registro - %s' %(object.name))</field>
+            <field name="binding_model_id" ref="model_legal_juicio"/>
+            <field name="paperformat_id" ref="paperformat_cl_letter_legal_juicio"/>
+            <field name="binding_type">report</field>
+        </record>
+        
+        <!-- <record id="action_report_otro_juicio" model="ir.actions.report">
+            <field name="name">Imprimir</field>
+            <field name="model">legal.juicio</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">l10n_cl_legal_contratos.unificacion_doc</field>
+            <field name="report_file">l10n_cl_legal_contratos.unificacion_doc</field>
+            <field name="print_report_name">('Adjuntos - %s' %(object.name))</field>
+            <field name="binding_model_id" ref="model_legal_juicio"/>
+            <field name="binding_type">report</field>
+        </record>
+         -->
+
+
+<!--pag de primera instancias depende del tipo de juicio-->
+<!-- pag Civil-->
+<template id="page_primera_civil">
+    <div  class="page" t-if="o.bandera_primera"> 
+        <h3 class ="text-center" >Primera Instancia</h3>
+        <br/>   
+        <div class="container">
+            <b><span>Conciliación</span></b>
+            <br/>
+            <div class="row"  style="margin: 10px;">
+                <table class="table table-sm" style="text-align: left;">
+                    <tr>
+                        <td >¿hay Conciliación por ambas partes?</td>
+                        <td  t-if="o.conciliacion_primera">Si</td>
+                        <td  t-else="">No</td>
+                    </tr>
+                    <tr t-if="o.conciliacion_primera">
+                        <td >Comentario de la conciliación:</td>
+                        <td   style="white-space: normal;word-break: break-word;"><span t-field="o.text_cociliacion_primera"/></td>
+                        
+                    </tr>
+                    <tr t-if="o.conciliacion_primera">
+                        <td >Adjunto:</td>
+                        <td ><span t-field="o.adjunto_conciliacion_primera_filename"/></td>
+                    </tr>
+                </table>
+            </div>
+            <div t-if="o.state_primera_civil in ['discusion_civil','prueba_civil','sentencia_civil','recursos_civil']">
+                <b><h5 class="text-start">Discusión</h5></b>
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div t-if="o.text_discusion_civil_ids">
+                                <t t-foreach="o.text_discusion_civil_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div t-if="o.adj_discusion_civil_ids">
+                                <t t-foreach="o.adj_discusion_civil_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>  
+            <br />
+            <div t-if="o.state_primera_civil in ['prueba_civil','sentencia_civil','recursos_civil']" >
+                <b><h5 class="text-start">Pruebas</h5></b>  
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <div t-if="o.text_prueba_civil_ids">
+                                <t t-foreach="o.text_prueba_civil_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div t-if="o.adj_prueba_civil_ids">
+                                <t t-foreach="o.adj_prueba_civil_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br />
+            <div t-if="o.state_primera_civil in ['sentencia_civil','recursos_civil']">
+                <b><h5 class="text-start">Sentencia</h5></b> 
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <tr >
+                            <td >¿Sentencia sin recursos?:</td>
+                            <td  t-if="o.cumplir_sentencia">Si</td>
+                            <td  t-else="">No</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           
+                            <div t-if="o.text_sentencia_civil_ids">
+                                <t t-foreach="o.text_sentencia_civil_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+             
+                <div class="row" style="margin: 10px;">    
+                    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div t-if="o.adj_sentencia_civil_ids">
+                                <t t-foreach="o.adj_sentencia_civil_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br />
+            <div t-if="o.state_primera_civil == 'recursos_civil'">
+                <b><h5 class="text-start">Recursos</h5></b>  
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;" >
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div t-if="o.text_recursos_civil_ids">
+                                <t t-foreach="o.text_recursos_civil_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div t-if="o.adj_recursos_civil_ids">
+                                <t t-foreach="o.adj_recursos_civil_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</template>
+    
+<!-- pag laboral monitorios-->
+<template id="page_laboral_monitorio">
+    <div  class="page" style="margin: 10px;" t-if="o.bandera_primera"> 
+        <h3 class ="text-center" >Primera Instancia</h3>
+        <br/>
+        <div class="container">
+            <b><span>Conciliación</span></b>
+            <br/>
+            <div class="row"  style="margin: 10px;" >
+                <table class="table table-sm" style="text-align: left;">
+                    <tr>
+                        <td >¿hay Conciliación por ambas partes?</td>
+                        <td  t-if="o.conciliacion_primera">Si</td>
+                        <td  t-else="">No</td>
+                    </tr>
+                    <tr t-if="o.conciliacion_primera">
+                        <td >Comentario de la conciliación:</td>
+                        <td   style="white-space: normal;word-break: break-word;"><span t-field="o.text_cociliacion_primera"/></td>
+                        
+                    </tr>
+                    <tr t-if="o.conciliacion_primera">
+                        <td >Adjunto:</td>
+                        <td ><span t-field="o.adjunto_conciliacion_primera_filename"/></td>
+                    </tr>
+                </table>
+            </div>
+        
+
+
+                <!--      <b><span>Aplazamiento</span></b>  
+                    <br/>
+                    <table class="table table-sm" style="text-align: left;">
+                        <tr>
+                            <td >¿Aplazamiento Solicitado?</td>
+                            <td  t-if="o.tiene_aplazamiento">Si</td>
+                            <td  t-else="">No</td>
+                        </tr>
+                        <tr t-if="o.tiene_aplazamiento">
+                            <td >Comentario de Aplazamiento:</td>
+                            <td >
+                                <div  style="white-space: normal;word-break: break-word;">
+                                    <span t-field="o.text_aplazamiento"/>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr t-if="o.tiene_aplazamiento">
+                            <td >Fecha de Reanudación:</td>
+                            <td ><span t-field="o.fecha_aplazamiento"/></td>
+                        </tr> 
+                    </table>
+        -->
+
+
+        
+        
+            <div t-if="o.state_primera_monitorio in ['audiencia_monitorio','recursos_monitorio']">
+                <b><h5 class="text-start">Audiencia Unica</h5></b>  
+
+                <div class="row" style="margin: 10px;" >
+                    <table class="table table-sm" style="text-align: left;">
+                        <tr >
+                            <td >¿Sentencia sin recursos?:</td>
+                            <td  t-if="o.cumplir_sentencia_monitorio">Si</td>
+                            <td  t-else="">No</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">
+                    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <div t-if="o.text_audiencia_monitorio_ids">
+                                <t t-foreach="o.text_audiencia_monitorio_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                         
+                            <div t-if="o.adj_audiencia_monitorio_ids">
+                                <t t-foreach="o.adj_audiencia_monitorio_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br />
+            <div t-if="o.state_primera_monitorio == 'recursos_monitorio'">
+                <b><h5 class="text-start">Recursos</h5></b>  
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <div t-if="o.text_recursos_monitorio_ids">
+                                <t t-foreach="o.text_recursos_monitorio_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <div t-if="o.adj_recursos_monitorio_ids">
+                                <t t-foreach="o.adj_recursos_monitorio_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</template>
+
+<!-- pag laboral apleaciones-->
+<template id="page_laboral_apelaciones">
+    <div  class="page" style="margin: 10px;" t-if="o.bandera_primera"> 
+        <h3 class ="text-center" >Primera Instancia</h3>
+        <br/>
+        <div class="container">
+            <b><span>Conciliación</span></b>
+              
+            <br/>
+            <div class="row"  style="margin: 10px;" >
+                <table class="table table-sm" style="text-align: left;">
+                    <tr>
+                        <td >¿hay Conciliación por ambas partes?</td>
+                        <td  t-if="o.conciliacion_primera">Si</td>
+                        <td  t-else="">No</td>
+                    </tr>
+                    <tr t-if="o.conciliacion_primera">
+                        <td >Comentario de la conciliación:</td>
+                        <td   style="white-space: normal;word-break: break-word;"><span t-field="o.text_cociliacion_primera"/></td>
+                        
+                    </tr>
+                    <tr t-if="o.conciliacion_primera">
+                        <td >Adjunto:</td>
+                        <td ><span t-field="o.adjunto_conciliacion_primera_filename"/></td>
+                    </tr>
+                </table>
+            </div>
+        
+            <div t-if="o.state_primera_apelacion in ['preparacion','audiencia_apelacion','recursos_apelacion']">
+                <b><h5 class="text-start">Audiencia de Preparación</h5></b>  
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <div t-if="o.text_preparacion_apelacion_ids">
+                                <t t-foreach="o.text_preparacion_apelacion_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           
+                            <div t-if="o.adj_preparacion_ids">
+                                <t t-foreach="o.adj_preparacion_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+            <br />
+            <div t-if="o.state_primera_apelacion in ['audiencia_apelacion','recursos_apelacion']">
+                <b><h5 class="text-start">Audiencia de Juicio Oral</h5></b>  
+                <div class="row" style="margin: 10px;">
+                   <table class="table table-sm" style="text-align: left;">
+                    <tr >
+                        <td >¿Sentencia sin recursos?:</td>
+                        <td  t-if="o.cumplir_sentencia_oral">Si</td>
+                        <td  t-else="">No</td>
+                    </tr>
+                </table> 
+                </div>
+                
+                <div class="row" style="margin: 10px;">
+                    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                
+                            <div t-if="o.text_audiencia_apelacion_ids">
+                                <t t-foreach="o.text_audiencia_apelacion_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           
+                            <div t-if="o.adj_audiencia_apelacion_ids">
+                                <t t-foreach="o.adj_audiencia_apelacion_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+            <br />
+            <div t-if="o.state_primera_apelacion == 'recursos_apelacion'">
+                <b><h5 class="text-start">Recursos</h5></b>  
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                                
+                            <div t-if="o.text_recursos_apelacion_ids">
+                                <t t-foreach="o.text_recursos_apelacion_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <div t-if="o.adj_recursos_apelacion_ids">
+                                <t t-foreach="o.adj_recursos_apelacion_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</template>
+<!-- pag JPL-->
+<template id="page_primera_jpl">
+    <div  class="page" style="margin: 10px;" t-if="o.bandera_primera"> 
+        <h3 class ="text-center" >Primera Instancia</h3>
+        <br/>
+        <div class="container">
+
+            <b><span>Conciliación</span></b>
+            <br/>
+            <div class="row"  style="margin: 10px;">
+                <table class="table table-sm" style="text-align: left;">
+                    <tr>
+                        <td >¿hay Conciliación por ambas partes?</td>
+                        <td  t-if="o.conciliacion_primera">Si</td>
+                        <td  t-else="">No</td>
+                    </tr>
+                    <tr t-if="o.conciliacion_primera">
+                        <td >Comentario de la conciliación:</td>
+                        <td   style="white-space: normal;word-break: break-word;"><span t-field="o.text_cociliacion_primera"/></td>
+                        
+                    </tr>
+                    <tr t-if="o.conciliacion_primera">
+                        <td >Adjunto:</td>
+                        <td ><span t-field="o.adjunto_conciliacion_primera_filename"/></td>
+                    </tr>
+                </table>
+            </div>
+        
+            <div t-if="o.state_primera_jpl in ['audiencia_jpl','sentencia_jpl','recursos_jpl']">
+                <b><h5 class="text-start">Audiencia</h5></b>  
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                                
+                            <div t-if="o.text_audiencia_jpl_ids">
+                                <t t-foreach="o.text_audiencia_jpl_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        
+                            <div t-if="o.adj_audiencia_jpl_ids">
+                                <t t-foreach="o.adj_audiencia_jpl_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+            
+            <br />
+            <div t-if="o.state_primera_jpl in ['sentencia_jpl','recursos_jpl']">
+                <b><h5 class="text-start">Sentencia</h5></b>  
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <tr >
+                            <td >¿Sentencia sin recursos?:</td>
+                            <td  t-if="o.cumplir_sentencia_jpl">Si</td>
+                            <td  t-else="">No</td>
+                        </tr>
+                    </table>
+
+                </div>
+
+               
+                <div class="row" style="margin: 10px;">
+                    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        
+                            <div t-if="o.text_sentencia_jpl_ids">
+                                <t t-foreach="o.text_sentencia_jpl_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+    
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                           
+                            <div t-if="o.adj_sentencia_jpl_ids">
+                                <t t-foreach="o.adj_sentencia_jpl_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+            
+            <br />
+            <div t-if="o.state_primera_jpl == 'recursos_jpl'" >
+                <b><h5 class="text-start">Recursos</h5></b>  
+                <div class="row" style="margin: 10px;">
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Comentarios</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            <div t-if="o.text_recursos_jpl_ids">
+                                <t t-foreach="o.text_recursos_jpl_ids" t-as="comentario">
+                                    <tr>
+                                        <td><span t-field="comentario.comentario"/></td> 
+                                        <td><span t-field="comentario.create_date"/></td> 
+                                        <td><span t-field="comentario.create_uid"/></td> 
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                       
+                    </table>
+                </div>
+    
+                <div class="row" style="margin: 10px;">    
+                    <table class="table table-sm" style="text-align: left;">
+                        <thead>
+                            <tr>
+                                <th scope="col">Adjuntos</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                       
+                            <div t-if="o.adj_recursos_jpl_ids">
+                                <t t-foreach="o.adj_recursos_jpl_ids" t-as="adjunto">
+                                    <tr>
+                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                    <td><span t-field="adjunto.create_date"/></td> 
+                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                    </tr>
+                                </t>
+                            </div>
+                            <div t-else="">
+                                <tr>
+                                    <td>Sin datos</td>
+                                    <td>...</td>
+                                    <td>...</td>
+                                </tr>
+                            </div>
+                        </tbody>
+                        
+                    </table>
+                </div>
+            </div>
+            
+
+        </div>
+    </div>
+</template>
+<!-- fin de la pag -->
+    <template id="report_juicio">
+        <t t-extend="web.assets_backend">
+            <t t-jquery="script" t-if="True" src="/web/static/lib/bootstrap/dist/js/bootstrap.bundle.min.js"/>
+            <t t-jquery="link" t-if="True" t-att-href="'/web/static/lib/bootstrap/dist/css/bootstrap.min.css'"/>
+        </t>
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o"> 
+                <t t-call="l10n_cl_base.cl_internal_clean_layout">
+                   
+                    <style>
+                        .pad_derecha {
+                            padding-right:10px;
+                        }
+                       
+                        
+                        
+                    </style>
+                    <!-- page  es todo lo que esta dentro de una hoja-->
+                    <div class="page" style="margin-top: 10px;" >
+                        <div>
+                            <h3 class ="text-center">Reporte del Juicio #<span t-field="o.numero_juicio"/></h3> 
+                            <br/>
+                            <div class="container">
+                                <div class="row">
+                                
+                                    <div class="col-6">
+                                        <b><span>Datos del juicio</span></b>  
+                                            <br/>
+                                        
+                                        <table class="table table-borderless" style="text-align: left;">
+                                            <tr>
+                                                <td >Caratula:</td>
+                                                <td ><span t-field="o.name"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Rit:</td>
+                                                <td ><span t-field="o.numero_juicio"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Fecha de ingreso:</td>
+                                                <td ><span t-field="o.create_date"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Fecha del juicio:</td>
+                                                <td ><span t-field="o.fecha_juicio"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Rol en la demanda:</td>
+                                                <td ><span t-field="o.peticion_juicio"/></td>
+                                            </tr>
+                                        </table>  
+                                        <br/>
+                                        <b><span>Notificación</span></b>  
+                                            <br/>
+                                        
+                                        <table class="table table-borderless" style="text-align: left;">
+                                            <tr>
+                                                <td >Notificación recibida:</td>
+                                                <td t-if="o.notificado"  >Si</td>
+                                                <td t-else=""  >No</td>
+
+                                            </tr>
+                                            <tr t-if="o.notificado">
+                                                <td >Fecha de la Notificación: </td>
+                                                <td ><span t-field="o.fecha_notificacion"/></td>
+                                            </tr>
+                                        </table>  
+                                        <br/>
+                                        <b><span>Jurisdicción</span></b>  
+                                            <br/>
+                                        
+                                        <table class="table table-borderless" style="text-align: left;">
+                                            <tr>
+                                                <td >Tipo de juicio:</td>
+                                                <td ><span style="white-space: normal;word-break: break-word;"  t-field="o.tipo_de_juicio"/></td>
+                                            </tr>
+                                            <tr t-if="o.tipo_de_juicio == 'laboral'">
+                                                <td >Tipo de Laboral:</td>
+                                                <td ><span t-field="o.tipo_laboral"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Corte:</td>
+                                                <td ><span style="white-space: normal;word-break: break-word;" t-field="o.corte"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Tribunal:</td>
+                                                <td ><span style="white-space: normal;word-break: break-word;" t-field="o.tribunal"/></td>
+                                            </tr>
+                                            
+                                        </table>
+                                    </div>
+                                    <div class="col-6">
+                                        <b><span>Identificación de las Partes</span></b>  
+                                            <br/>
+                                        <table class="table table-borderless" style="text-align: left;">
+                                            <tr>
+                                                <td >Sanitaria Implicada:</td>
+                                                <td ><span t-field="o.company_id"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Nombre del Representante:</td>
+                                                <td ><span  t-field="o.representante"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Corrreo del Representante:</td>
+                                                <td ><span t-field="o.correo_representante"/></td>
+                                            </tr>
+                                        </table>
+                                            <br/>
+                                            <table class="table table-borderless" style="text-align: left;">
+                                            <tr>
+                                                <td >Nombre de la Contraparte:</td>
+                                                <td ><span t-field="o.nombre_contraparte"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Direección de la Contraparte:</td>
+                                                <td ><span t-field="o.direccion_contraparte"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td >Correo de la Contraparte:</td>
+                                                <td ><span t-field="o.correo_contraparte"/></td>
+                                            </tr>
+                                        </table>
+                                       
+                                        <br/>
+                                        <b><span>Estado Actual del juicio</span></b>  
+                                            <br/>
+                                        
+                                        <table class="table table-borderless" style="text-align: left;">
+                                            <tr>
+                                                <td >Estado Actual del juicio:</td>
+                                                <td ><span t-field="o.state"/></td>
+                                            </tr>
+                                        </table>
+
+                                        <table class="table table-borderless" style="text-align: left;">
+                                            <b><span>Progreso de Instancias:</span></b>  
+                                            <br/>
+                                            <tr>
+                                                <td >Primera Instancia:</td>
+                                                <td t-if="o.bandera_primera and o.tipo_de_juicio == 'civil' " ><span t-field="o.state_primera_civil"/></td>
+                                                <td t-elif="o.bandera_primera and o.tipo_laboral == 'monitorios' " ><span t-field="o.state_primera_monitorio"/></td>
+                                                <td t-elif="o.bandera_primera and o.tipo_laboral == 'apelacion' " ><span t-field="o.state_primera_apelacion"/></td>
+                                                <td t-elif="o.bandera_primera and o.tipo_de_juicio == 'JPL' " ><span t-field="o.state_primera_jpl"/></td>
+                                                <td t-else="" >...</td>
+                                            </tr>
+                                            <tr>
+                                                <td >Corte de Apelaciones:</td>
+                                                <td  t-if="o.bandera_segunda"><span t-field="o.state_segunda"/></td>
+                                                <td  t-else="">...</td>
+                                            </tr>
+                                            <tr>
+                                                <td >Corte Suprema:</td>
+                                                <td  t-if="o.bandera_cortesuprema"><span t-field="o.state_corte"/></td>
+                                                <td t-else="">...</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <br/>
+                                <b><span>Reconvención</span></b>  
+                                <br/>
+                                <div class="row">
+                                    <table class="table table-borderless" style="text-align: left;" >
+                                        <tr>
+                                            <td >¿Es Reconvención?:</td>
+                                            <td t-if="o.es_reconvencion">Si</td>
+                                            <td t-else="">No</td>
+                                        </tr>
+                                        <tr t-if="o.es_reconvencion">
+                                            <td >Juicio de Reconvención:</td>
+                                            <td ><span t-field="o.reconvencion_id"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <br/>
+                                <div style="page-break-after: always;"><br/></div>
+                                <div class="page" style="margin-top: 10px;">
+                                    <h3 class="text-center">Reconvenciones Asociadas</h3>
+                                    <br/>
+                                    <div class="row" style="margin: 10px;">
+                                        <table class="table table-bordered" style="text-align: left;">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">Caratula</th>
+                                                    <th scope="col">Rit</th>
+                                                    <th scope="col">Fecha</th>
+                                                    <th scope="col">Juicio</th>
+                                                    <th scope="col">Estado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <div t-if="o.hijos_reconvencion_ids">
+                                                    <t t-foreach="o.hijos_reconvencion_ids" t-as="hijos">
+                                                        <tr>
+                                                            <td><span t-field="hijos.name"/></td> 
+                                                            <td><span t-field="hijos.numero_juicio"/></td> 
+                                                            <td><span t-field="hijos.create_date"/></td> 
+                                                            <td><span t-field="hijos.tipo_de_juicio"/></td> 
+                                                            <td><span t-field="hijos.state"/></td> 
+                                                        </tr>
+                                                    </t>
+                                                </div>
+                                                <div t-else="">
+                                                    <tr>
+                                                        <td>Sin datos</td>
+                                                        <td>...</td>
+                                                        <td>...</td>
+                                                        <td>...</td>
+                                                    </tr>
+                                                </div>
+                                            </tbody>
+                                        </table>  
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>       
+                    </div>
+                    <div style="page-break-after: always;"><br/></div>
+                    <div class="page" style="margin-top: 10px;">
+                        <br/>
+                        <b><h3 class="text-center">Escrito de demanda</h3></b> 
+                        <br/>
+                        <div class="container">
+                            <div class="row">
+                                <table class="table table-sm" style="text-align: left;">
+                                    <tr>
+                                        <td><b>Motivo de la demanda:</b></td>
+                                        <td ><span style="white-space: normal;word-break: break-word;" t-field="o.motivo_demanda"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td ><b>Reclamos legales:</b></td>
+                                        <td ><span style="white-space: normal;word-break: break-word;" t-field="o.reclamos_legales"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td ><b>Fundamentos legales:</b></td>
+                                        <td ><span style="white-space: normal;word-break: break-word;" t-field="o.fundamentos_legales"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td ><b>Petición de la demanda:</b></td>
+                                        <td ><span style="white-space: normal;word-break: break-word;" t-field="o.peticion"/></td>
+                                    </tr>
+                                    <tr t-if="o.rebeldia">
+                                        <td ><b>Comentario Rebeldía:</b></td>
+                                        <td ><span style="white-space: normal;word-break: break-word;" t-field="o.rebeldia"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                   
+                    <!-- Esto es el salto de hoja-->
+                    <div t-if="o.bandera_primera" style="page-break-after: always;"><br/></div>
+                    <t t-call="l10n_cl_legal_contratos.page_primera_civil" t-if="o.tipo_de_juicio == 'civil'"/>
+                    <t t-call="l10n_cl_legal_contratos.page_laboral_monitorio" t-if="o.tipo_de_juicio == 'laboral' and o.tipo_laboral == 'monitorios'"/>
+                    <t t-call="l10n_cl_legal_contratos.page_laboral_apelaciones" t-if="o.tipo_de_juicio == 'laboral' and o.tipo_laboral == 'apelacion'"/>
+                    <t t-call="l10n_cl_legal_contratos.page_primera_jpl" t-if="o.tipo_de_juicio == 'JPL'"/>
+                    
+                    <!-- Esto es el salto de hoja-->
+                    <div t-if="o.bandera_segunda" style="page-break-after: always;"><br/></div>
+                    <div class="page" t-if="o.bandera_segunda" style="margin:10px;">
+                        <h3 class="text-center">Corte de Apelaciones</h3>      <!-- corte de apelaciones-->
+                        <br/>
+                        <div class="container">
+                            <b><span>Conciliación</span></b>
+                            <br/>
+                            <div class="row" style="margin: 10px;" >
+                                <table class="table table-sm" style="text-align: left;">
+                                    <tr>
+                                        <td >¿hay Conciliación por ambas partes?</td>
+                                        <td  t-if="o.conciliacion_segunda">Si</td>
+                                        <td  t-else="">No</td>
+                                    </tr>
+                                    <tr t-if="o.conciliacion_segunda">
+                                        <td >Comentario de la conciliación:</td>
+                                        <td   style="white-space: normal;word-break: break-word;"><span t-field="o.text_cociliacion_segunda"/></td>
+                                        
+                                    </tr>
+                                    <tr t-if="o.conciliacion_segunda">
+                                        <td >Adjunto:</td>
+                                        <td ><span t-field="o.adjunto_conciliacion_segunda_filename"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <br/>
+                            <div t-if="o.state_segunda in ['ingreso_recurso','auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda']">
+                                <b><h5 class="text-start">Ingreso de Recurso</h5></b>  
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                           
+                                            <div t-if="o.text_ingreso_segunda_ids">
+                                                <t t-foreach="o.text_ingreso_segunda_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                          
+                                            <div t-if="o.adj_ingreso_recurso_ids">
+                                                <t t-foreach="o.adj_ingreso_recurso_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                    <td><span t-field="adjunto.create_date"/></td> 
+                                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <br/>
+                            <div t-if="o.state_segunda in ['auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda']">
+                                <b><h5 class="text-start">Autos en relación</h5></b>
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <div t-if="o.text_auto_relacion_segunda_ids">
+                                                <t t-foreach="o.text_auto_relacion_segunda_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                            
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <div t-if="o.adj_auto_relacion_ids">
+                                                <t t-foreach="o.adj_auto_relacion_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                    <td><span t-field="adjunto.create_date"/></td> 
+                                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <br />
+                            <div t-if="o.state_segunda in ['inclusion_tabla','sentencia_segunda','recursos_segunda']">
+                                <b><h5 class="text-start">Inclusión a la Tabla</h5></b>
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <div t-if="o.text_inclusion_tabla_segunda_ids">
+                                                <t t-foreach="o.text_inclusion_tabla_segunda_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <div t-if="o.adj_inclusion_tabla_ids">
+                                                <t t-foreach="o.adj_inclusion_tabla_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                    <td><span t-field="adjunto.create_date"/></td> 
+                                                    <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                      
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <br />
+                            <div t-if="o.state_segunda in ['sentencia_segunda','recursos_segunda']">
+                                <b><h5 class="text-start">Sentencia</h5></b> 
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <tr >
+                                            <td >¿Sentencia sin recursos?:</td>
+                                            <td  t-if="o.cumplir_sentencia_segunda">Si</td>
+                                            <td  t-else="">No</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <div t-if="o.text_sentencia_segunda_ids">
+                                                <t t-foreach="o.text_sentencia_segunda_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <div t-if="o.adj_sentencia_segunda_ids">
+                                                <t t-foreach="o.adj_sentencia_segunda_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                        <td><span t-field="adjunto.create_date"/></td> 
+                                                        <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <br />
+                            <div t-if="o.state_segunda == 'recursos_segunda'">
+                                <b><h5 class="text-start">Recursos</h5></b>  
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <div t-if="o.text_recursos_segunda_ids">
+                                                <t t-foreach="o.text_recursos_segunda_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                    
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <div t-if="o.adj_recursos_segunda_ids">
+                                                <t t-foreach="o.adj_recursos_segunda_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                        <td><span t-field="adjunto.create_date"/></td> 
+                                                        <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div  t-if="o.bandera_cortesuprema" style="page-break-after: always;"><br/></div>
+                    <div class="page" t-if="o.bandera_cortesuprema" style="margin:10px;">
+                        <!-- Corte Suprema-->
+                        <h3 class="text-center">Corte Suprema</h3>
+                        <br/>
+                        <div class="container">
+                            <b><span>Conciliación</span></b>
+                        
+                            <br/>
+                            <div class="row"  style="margin: 10px;" >
+                                <table class="table table-sm" style="text-align: left;">
+                                    <tbody>
+                                         <tr>
+                                            <td >¿hay Conciliación por ambas partes?</td>
+                                            <td  t-if="o.conciliacion_corte">Si</td>
+                                            <td  t-else="">No</td>
+                                        </tr>
+                                        <tr t-if="o.conciliacion_corte">
+                                            <td >Comentario de la conciliación:</td>
+                                            <td   style="white-space: normal;word-break: break-word;"><span t-field="o.text_cociliacion_corte"/></td>
+                                            
+                                        </tr>
+                                        <tr t-if="o.conciliacion_corte">
+                                            <td >Adjunto:</td>
+                                            <td ><span t-field="o.adjunto_conciliacion_corte_filename"/></td>
+                                        </tr>
+                                    </tbody>
+                                    
+                                </table>
+                            </div>
+                            <br/>
+                            <div t-if="o.state_corte in ['ingreso_recurso_corte','auto_relacion_corte','inclusion_tabla_corte','sentencia_final']">
+                                <b><h5 class="text-start">Ingreso de Recurso</h5></b>  
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <div t-if="o.text_ingreso_recurso_corte_ids">
+                                                <t t-foreach="o.text_ingreso_recurso_corte_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <div t-if="o.adj_ingreso_recurso_corte_ids">
+                                                <t t-foreach="o.adj_ingreso_recurso_corte_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                        <td><span t-field="adjunto.create_date"/></td> 
+                                                        <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <br/>
+                            <div t-if="o.state_corte in ['auto_relacion_corte','inclusion_tabla_corte','sentencia_final']">
+                                <b><h5 class="text-start">Autos en relación</h5></b>
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <div t-if="o.text_auto_relacion_corte_ids">
+                                                <t t-foreach="o.text_auto_relacion_corte_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <div t-if="o.adj_auto_relacion_corte_ids">
+                                                <t t-foreach="o.adj_auto_relacion_corte_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                        <td><span t-field="adjunto.create_date"/></td> 
+                                                        <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <br/>
+                            <div t-if="o.state_corte in ['inclusion_tabla_corte','sentencia_final']">
+                                <b><h5 class="text-start">Inclusión a la Tabla</h5></b>
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <div t-if="o.text_inclusion_tabla_corte_ids">
+                                                <t t-foreach="o.text_inclusion_tabla_corte_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                           
+                                            <div t-if="o.adj_inclusion_tabla_corte_ids">
+                                                <t t-foreach="o.adj_inclusion_tabla_corte_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                        <td><span t-field="adjunto.create_date"/></td> 
+                                                        <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <br/>
+                            <div t-if="o.state_corte == 'sentencia_final'">
+                                <b><h5 class="text-start">Sentencia</h5></b> 
+
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <tr >
+                                            <td >¿Cumplir Sentencia final?:</td>
+                                            <td  t-if="o.cumplir_sentencia_corte">Si</td>
+                                            <td  t-else="">No</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Comentarios</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            
+                                            <div t-if="o.text_sentencia_final_ids">
+                                                <t t-foreach="o.text_sentencia_final_ids" t-as="comentario">
+                                                    <tr>
+                                                        <td><span t-field="comentario.comentario"/></td> 
+                                                        <td><span t-field="comentario.create_date"/></td> 
+                                                        <td><span t-field="comentario.create_uid"/></td> 
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                        
+                                    </table>
+                                </div>
+                                <div class="row" style="margin: 10px;">    
+                                    <table class="table table-sm" style="text-align: left;">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Adjuntos</th>
+                                                <th scope="col">Fecha</th>
+                                                <th scope="col">Usuario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                           
+                                            <div t-if="o.adj_sentencia_final_ids">
+                                                <t t-foreach="o.adj_sentencia_final_ids" t-as="adjunto">
+                                                    <tr>
+                                                        <td><span t-field="adjunto.adjunto_filename"/></td> 
+                                                        <td><span t-field="adjunto.create_date"/></td> 
+                                                        <td><span t-field="adjunto.create_uid"/></td>  
+                                                    </tr>
+                                                </t>
+                                            </div>
+                                            <div t-else="">
+                                                <tr>
+                                                    <td>Sin datos</td>
+                                                    <td>...</td>
+                                                    <td>...</td>
+                                                </tr>
+                                            </div>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- hoja de cumplimiento-->
+                    <div  t-if="o.bandera_cortesuprema" style="page-break-after: always;"><br/></div>
+                    <div class="page" t-if="o.state in ['cumplimiento','finalizado','cancelado']">
+                        <h3 class="text-center">Cumplimiento</h3>
+                            <h5 class="text-start">Cumplimiento por periodo</h5>
+                            <div class="row" style="margin: 10px;" >    
+                            <table class="table table-sm" style="text-align: left;">
+                                <tbody>
+                                    <tr>
+                                        <td>Periodo de inicio (*opcional)</td>
+                                        <td t-if="o.cumplimiento_tiempo">Si</td>
+                                        <td t-else="">No</td>
+                                    </tr>
+
+
+                                    <div t-if="o.cumplimiento_tiempo">
+                                        <tr>
+                                            <td>Fecha de Inicio:</td> 
+                                            <td><span t-field="o.fecha_inicio_cumplimiento"/></td> 
+                                        </tr>
+                                        <tr>
+                                            <td>Comentario:</td> 
+                                            <td><span t-field="o.text_comentario_cumplimiento"/></td>  
+                                        </tr>
+                                        
+                                    </div>
+                                    
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row" style="margin: 10px;" t-if="o.cumplimiento_tiempo" >    
+                            <table class="table table-sm" style="text-align: left;">
+                                <tbody>
+                                    <tr>
+                                        <td>Periodo de Termino:</td>
+                                        <td t-if="o.cumplimiento_termino">Si</td>
+                                        <td t-else="">No</td>
+                                    </tr>
+                                    
+                                    <div t-if="o.cumplimiento_termino">
+                                        <tr>
+                                            <td>Fecha de Termino:</td> 
+                                            <td><span t-field="o.fecha_termino_cumplimiento"/></td> 
+                                        </tr>
+                                        <tr>
+                                            <td>Comentario:</td> 
+                                            <td><span t-field="o.text_comentario_termino"/></td>  
+                                        </tr>
+                                        
+                                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+                        <h5 class="text-start">Sentencia terminada:</h5> 
+                        <div class="row" style="margin: 10px;" >   
+                            <table class="table table-sm" style="text-align: left;">
+                                <tbody>
+                                    <tr>
+                                        <td>Sentencia Cumplida:</td>
+                                        <td t-if="o.sentencia_cumplida">Si</td>
+                                        <td t-else="">No</td>
+                                    </tr>
+                                    <div t-if="o.sentencia_cumplida">
+                                        <tr>
+                                            <td>Comentario:</td> 
+                                            <td><span t-field="o.txt_sentencia_cumplida"/></td>  
+                                        </tr>
+                                    </div>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+  
+    
+
+</data>
+
+</odoo>

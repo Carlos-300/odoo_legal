@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+        <record id="imprimir_contrato_wizard" model="ir.ui.view">
+            <field name="name">from_imprimir_contrato</field>
+            <field name="model">legal.contrato.imprimir</field>
+            <field name="arch" type="xml" >
+                <form  > 
+                    <group>
+                        <field name="contrato_id" options="{'no_create':True, 'no_open':True}" invisible="1"/>
+                        <field name="opcion" required="1"/>
+                    </group>
+                    <footer>
+                        <button name="get_file_contrato" class="oe_highlight" string="Descargar" type="object"/>
+                        <button string="Cancelar" class="oe_link" special="cancel" />
+                    </footer>
+                   
+                </form>
+            </field>
+        </record>  
+
+        
+        <record id="action_menu_wizard_contrato" model="ir.actions.act_window">
+            <field name="name">Imprimir Adjuntos de Contrato</field>
+            <field name="res_model">legal.contrato.imprimir</field>
+            <field name="view_mode">form</field> 
+            <field name="target">new</field>
+           
+        </record>
+
+        <!-- <menuitem name="Imprimir Contrato" id="imprimir_contrato" parent="l10n_cl_legal_contratos.menu_adjuntos"  action="action_menu_wizard_contrato" /> -->
+
+</odoo>

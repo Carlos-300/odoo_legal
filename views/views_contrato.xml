@@ -1,0 +1,229 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+    <record id="view_legal_contrato_form" model="ir.ui.view">
+        <field name="name">view.legal.contrato.form</field>
+         <!--esto llama al modelo que estamos por cambiar la vista de from -->
+        <field name="model">legal.contrato</field>
+         <!-- le decimos el tipo de arquitectura dentro de este field iria todo el from-->
+         <!-- states= "opcion de la variable states" para identificar en que momento dejarlo visible -->
+        <field name="arch" type="xml"> 
+            <form>
+                <header>
+                    <!-- 
+                    <button string="Anterior" type="object" name="boton_steate_anterior" class="oe_highlight"/>
+                    <button string="Siguiente" type="object" name="boton_state" class="oe_highlight"/>
+                    -->
+                    <!-- Volver -->
+                    <button string="Volver a Borrador" type="object" name="boton_borrador" attrs="{'invisible':[('state','!=', 'revision')] }" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Revisión" type="object" name="boton_revision" attrs="{'invisible':[('state','!=', 'firmados')] }" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Firmados" type="object" name="boton_firmados" attrs="{'invisible':[('state','!=', 'vigente')] }" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Vigente" type="object" name="boton_vigente" attrs="{'invisible':[('state','not in', ['vencido','finalizado'])] }" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    
+                    <!-- Pasar-->
+                    <button string="Pasar a Revisión" type="object" name="boton_revision" attrs="{'invisible':[('state','!=', 'borrador')] }" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Firmados" type="object" name="boton_firmados" attrs="{'invisible':[('state','!=', 'revision')] }" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Vigente" type="object" name="boton_vigente" attrs="{'invisible':[('state','!=', 'firmados')] }" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Vencido" type="object" name="boton_vencido" attrs="{'invisible':[('state','!=', 'vigente')] }" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Finalizado" type="object" name="boton_finalizado" attrs="{'invisible':[('state','!=', 'vigente')] }" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+
+                    <button string="Cancelado" type="object" name="boton_cancelado" attrs="{'invisible':[('state','=', 'cancelado')] }" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro de Cancelar ?"/>
+        
+                  
+                    <field name="state" widget="statusbar" statusbar_visible="borrador,revision,firmados,vigente,vencido,finalizado"/> 
+                    <button string="Imprimir Adjuntos" type="object" name="get_file_all"  groups="l10n_cl_legal_contratos.legal_contrato_group_admin" />
+                
+                </header>
+                 <!--etiqueta entrega el efecto de hoja en la vista -->
+                <sheet>
+                    <group>
+                        <group> 
+                            <separator string="Datos"/>
+                            <field name="name" attrs="{'readonly':[('state','not in',['borrador', 'revision'])]}"/>
+                            <field name="numero_contrato" attrs="{'readonly':[('state','not in',['borrador', 'revision'])]}"/>
+                            <field name="tipo_de_contrato" attrs="{'readonly':[('state','not in','borrador')]}"/>
+                      
+                            <separator string="Fechas"/>
+                            <field name="create_date" string="Fecha de ingreso al sistema"   widget="date"/>
+                            <field name="fecha_inicio" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])]}"/>
+                            <field name="fecha_recepcion" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])]}"/>
+
+                            <field name="contrato_indefinido" attrs="{'invisible': [('tipo_de_contrato', 'not in', ['servidumbre', 'prestacion de servicios'])],'required': [('tipo_de_contrato', 'in', ['servidumbre', 'prestacion de servicios'])]}"/>
+                            
+                            <field name="duracion_contrato"  attrs="{'readonly':[('state','not in','borrador')],'invisible':[('tipo_de_contrato','!=','arrendamiento')],'required':[('tipo_de_contrato','=','arrendamiento')]}" />
+                            
+                            <field name="tiene_plazofijo"  attrs="{'readonly':[('state','not in','borrador')],'invisible':[('contrato_indefinido','=', True)] }" />
+                            <field name="fecha_vencimiento" attrs="{'readonly':[('state','not in',['borrador', 'revision'])],'required':[('tiene_plazofijo', '=', True)],'invisible':[('tiene_plazofijo', '=', False)] }"/>
+                            
+                            <separator string="Documentos Adjuntos"/>
+                            <field name="contrato_borrador_filename" invisible="1" />
+                            <field name="contrato_borrador" filename="contrato_borrador_filename" attrs="{'readonly':[('state','!=','borrador')] }"/>
+                            <field name="contrato_revision_filename" invisible="1"/>
+                            <field name="contrato_revision" filename="contrato_revision_filename" attrs="{'required':[('state', 'not in', ['borrador', 'revision' ,'cancelado'])], 'invisible':[('state', 'in', 'borrador')], 'readonly':[('state','not in',['borrador', 'revision' ])] } " />
+                            <field name="contrato_firmados_filename" invisible="1"/>
+                            <field name="contrato_firmados" filename="contrato_firmados_filename" attrs="{'required':[('state', 'not in', ['borrador', 'revision' ,'cancelado'])], 'invisible':[('state', 'in', ['borrador', 'revision'])], 'readonly':[('state','not in',['borrador', 'revision', 'firmados'])] } " />
+                            
+
+                            <separator string="Expiración" attrs="{'invisible':[('state','not in', ['vigente','vencido','finalizado'])]}"/> 
+                            <field name="solicitud_de_termino"  attrs="{'invisible':['|', ('state', 'not in', ['vigente','vencido','finalizado']),('tipo_de_contrato','not in',['servidumbre','prestacion de servicios','arrendamiento'])]}"/>
+                            <field name="fecha_solicitud_termino" attrs="{'invisible':['|', ('state', 'not in', ['vigente','vencido','finalizado']),('solicitud_de_termino','=',False)],'required':[('solicitud_de_termino','=',True)]}"/>
+                            <field name="adj_termino" filename="adj_termino_filename" attrs="{'invisible':['|', ('state', 'not in', ['vigente','vencido','finalizado']),('solicitud_de_termino','=',False)],'required':[('solicitud_de_termino','=',True)] }"/>
+                            <field name="adj_termino_filename" invisible="1"/>
+                            
+
+                            <field name="finalizacion_obra"  attrs="{'invisible':['|', ('tipo_de_contrato','!=','obra'),('state', 'not in', ['vigente','vencido','finalizado'])]}"/>
+                            <field name="fecha_recepcion_obra" attrs="{'invisible':[('finalizacion_obra','=',False)],'required':[('finalizacion_obra','=',True)]}"/>
+                            <field name="adjunto_finalobra" filename="adjunto_finalobra_filename" attrs="{'invisible':[('finalizacion_obra','=',False)],'required':[('finalizacion_obra','=',True)] }"/>
+                            <field name="adjunto_finalobra_filename" invisible="1"/>
+                            
+                            <field name="finalizacion_compraventa"  attrs="{'invisible':['|', ('tipo_de_contrato','!=','compraventa/promesa'),('state', 'not in', ['vigente','vencido','finalizado'])]}"/>
+                            <field name="fecha_finaliza_compraventa"  attrs="{'invisible':[('finalizacion_compraventa','=',False)],'required':[('finalizacion_compraventa','=',True)] }"/>
+                            <field name="tipo_finalizacion_compraventa" attrs="{'invisible':[('finalizacion_compraventa','=',False)],'required':[('finalizacion_compraventa','=',True)]}"/>
+                            <field name="comentario_finalizado" attrs="{'invisible':[('finalizacion_compraventa','=',False)],'required':[('finalizacion_compraventa','=',True)] }"/>
+                            
+                        </group>
+                        <group>
+                            <separator string="Responsable Contrato"/>
+                            <field name="company_id"/>
+                            <field name="concesion_id" options="{'no_create':True, 'no_open':True}" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])] }"/>
+                            <field name="departamento_id" options="{'no_create':True, 'no_open':True}" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])] }"/>
+                            <field name="responsable_id" options="{'no_create':True, 'no_open':True}" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])] }" /> 
+                            
+                            <separator string="Contraparte Contrato"/>
+                            <field name="es_empresa" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])] }" />
+                            <field name="nombre_contraparte" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])] }"/>
+                            <field name="rut_contraparte" placeholder="RUT sin puntos ni guión (123456789)" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])] }"/>
+
+                            <separator string="Recordatorio"/>
+                            <field name="activar_recordatorio"/>
+                            <field name="fecha_recordatorio"  attrs="{'required':[('activar_recordatorio','=',True)],'invisible':[('activar_recordatorio','=',False)] }"/>
+                     
+                        </group>
+                        
+                    </group>
+                    <notebook>
+                        <page string="Comentarios">
+                            <group>
+                                <field name="comentario_borrador" style="white-space: normal;word-break: break-word;" required="1" attrs="{'readonly':[('state','!=','borrador')]}" />
+                                <field name="comentario_revision" style="white-space: normal;word-break: break-word;" attrs="{'invisible':[('state','in','borrador')],'required':[('state','=','revision')],'readonly':[('state','!=','revision')]}"/>
+                                <field name="comentario_firmados" style="white-space: normal;word-break: break-word;" attrs="{'invisible':[('state','in',['borrador','revision'])],'required':[('state','=', 'firmados')],'readonly':[('state','!=','firmados')]}"/>
+                                <field name="comentario_vigente" style="white-space: normal;word-break: break-word;" attrs="{'invisible':[('state','in',['borrador','revision','firmados'])],'required':[('state','=','vigente')],'readonly':[('state','!=','vigente')]}"/>
+                                <field name="comentario_vencido" style="white-space: normal;word-break: break-word;" attrs="{'invisible':[('state','in',['borrador','revision','firmados', 'vigente'])],'required':[('state','=','vencido')],'readonly':[('state','!=','vencido')]}"/>
+                                <field name="comentario_finalizado" style="white-space: normal;word-break: break-word;" attrs="{'invisible':[('state','in',['borrador','revision','firmados', 'vigente'])],'required':[('state','=','finalizado')],'readonly':[('state','!=','finalizado')]}"/>
+                               
+                            </group>
+                        </page>
+                        <page string="Doc. Extras" name="page_anexo">
+                            <group>
+
+                                <field name="detalle_extra_ids" nolabel="1" attrs="{'readonly':[('state','in',['borrador','revision','cancelado'])]}">
+                                    <tree editable="bottom" delete="false">
+                                        <control>
+                                            <create name="boton_agregar" string="Agregar"  class="bottom"/>
+                                        </control>
+                                        <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                        <field name="adjunto_filename" invisible="1"/>
+                                        <field name="fecha_recepcion"/>
+                                        <field name="create_date"/>
+                                        <field name="state_agregado" readonly="1"/>
+                                        <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','not in',['firmados','vigente','vencido','finalizado'])]}" />
+                                    </tree>
+                                </field>
+                                
+                                
+                            </group>
+                        </page>
+                        <page string="Usuario">
+                            <group>
+                                <field name="usuario_ids"  widget="many2many_tags" options="{'no_create':True, 'no_open':True}" > 
+                                    <tree >
+                                        <field name="name"/>
+                                        <field name="department_id"/>
+                                        <field name="company_id"/>
+                                        <field name="email"/>
+                                       
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
+                    
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>
+                
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_legal_contrato_new_tree" model="ir.ui.view">
+        <field name="name">view.legal.contrato.tree</field>
+        <field name="model">legal.contrato</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="numero_contrato" />
+                <field name="tipo_de_contrato"/>
+                <field name="responsable_id"/>
+                <field name="nombre_contraparte"/>
+                <field name="rut_contraparte"/>
+                <field name="concesion_id"/>
+                <field name="departamento_id"/>
+                <field name="fecha_recepcion"/>
+                <field name="fecha_vencimiento"/>
+                <field name="state" widget="badge" decoration-success="state == 'vigente'" decoration-muted="state == 'borrador'"  decoration-danger="state == 'cancelado'" decoration-warning="state == 'revision'" decoration-info="state == 'firmados'" decoration-primary="state == 'terminado'" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_legal_contrato_search" model="ir.ui.view"> 
+        <field name="name">view.legal.contrato.search</field>
+        <field name="model">legal.contrato</field>
+        <field name="arch" type="xml">
+            <search>
+                <!-- buscador escritura-->
+                <field name="name"/>
+                <field name="numero_contrato"/>
+                <field name="responsable_id" />
+                <field name="nombre_contraparte" />
+                <field name="rut_contraparte" />
+                <field name="state"/>
+
+                <!-- buscador categoria filter--> 
+                <filter string="Estado: Borrador" name="state_borrador" domain="[('state','=','borrador')]" />
+                <filter string="Estado: Revisión" name="state_revision" domain="[('state','=','revision')]" />
+                <filter string="Estado: Firmados" name="state_firmado" domain="[('state','=','firmados')]" />
+                <filter string="Estado: Vigente" name="state_vigente" domain="[('state','=','vigente')]" />
+                <filter string="Estado: Vencido" name="state_vencido" domain="[('state','=','vencido')]" />
+                <filter string="Estado: Finalizado" name="state_finalizado" domain="[('state','=','finalizado')]" />
+                <filter string="Estado: Cancelado" name="state_cancelado" domain="[('state','=','cancelado')]" />
+                <filter string="default" name="filter_activo_state" domain="[('state','not in',['finalizado','cancelado'])]" />
+                <separator/>
+                <filter string="Contrato: Obra" name="tipo_de_contrato" domain="[('tipo_de_contrato','=','obra')]" />
+                <filter string="Contrato: Servidumbre" name="tipo_de_contrato" domain="[('tipo_de_contrato','=','servidumbre')]" />
+                <filter string="Contrato: Compraventa/Promesa Compraventa" name="tipo_de_contrato" domain="[('tipo_de_contrato','=','compraventa/promesa')]" />
+                <filter string="Contrato: Arrendamiento" name="tipo_de_contrato" domain="[('tipo_de_contrato','=','arrendamiento')]" />
+                <filter string="Contrato: Prestación de servicios" name="tipo_de_contrato" domain="[('tipo_de_contrato','=','prestación de servicios')]" />
+           
+                <!-- buscador  por agrupaciones -->
+                <group string="Group By">
+                    <filter string="Nombre contraparte" name="by_nombre_contraparte" context="{'group_by':'nombre_contraparte'}"/>
+                    <filter string="Rut contraparte" name="by_rut_contraparte" context="{'group_by':'rut_contraparte'}"/>
+                    <separator/>
+                    <filter string="Concesión" name="by_concesion" context="{'group_by':'concesion_id'}"/>
+                    <filter string="Departamento" name="by_departamento" context="{'group_by':'departamento_id'}"/>
+                    <separator/>
+                    <filter string="Estado" name="by_estado" context="{'group_by':'state'}"/>
+                    <separator/>
+                    <filter string="Fecha de vencimiento" name="by_vencimiento" context="{'group_by':'fecha_vencimiento'}"/>
+                    <filter string="Fecha de recepción" name="by_recepcion" context="{'group_by':'fecha_recepcion'}"/>
+                    <separator/>
+                    <filter string="Tipo de contratos" name="by_tipo_de_contrato" context="{'group_by':'tipo_de_contrato'}"/>
+                    <separator/>
+                </group>
+            </search>
+        </field>
+    </record>
+</odoo>

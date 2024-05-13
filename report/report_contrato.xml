@@ -1,0 +1,269 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <!-- Report de los contratos y sus adjuntos -->
+        <record id="paperformat_cl_letter_legal_contrato" model="report.paperformat">
+            <field name="name">CL Letter juicio</field>
+            <field name="default" eval="True"/>
+            <field name="format">Letter</field>
+            <field name="page_height">0</field>
+            <field name="page_width">0</field>
+            <field name="orientation">Portrait</field>
+            <field name="margin_top">30</field>
+            <field name="margin_bottom">40</field>
+            <field name="margin_left">15</field>
+            <field name="margin_right">15</field>
+            <field name="header_line" eval="False"/>
+            <field name="header_spacing">0</field> 
+            <field name="dpi">100</field>
+            
+        </record> 
+
+
+        <record id="action_report_contrato" model="ir.actions.report">
+            <field name="name">Imprimir - Registro</field>
+            <field name="model">legal.contrato</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">l10n_cl_legal_contratos.report_contrato</field>
+            <field name="report_file">l10n_cl_legal_contratos.report_contrato</field>
+            <field name="print_report_name">('Contrato - %s' %(object.name))</field>
+            <field name="binding_model_id" ref="model_legal_contrato"/>
+            <field name="paperformat_id" ref="paperformat_cl_letter_legal_contrato"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="report_contrato">
+            <t t-extend="web.assets_backend">
+                <t t-jquery="script" t-if="True" src="/web/static/lib/bootstrap/dist/js/bootstrap.bundle.min.js"/>
+                <t t-jquery="link" t-if="True" t-att-href="'/web/static/lib/bootstrap/dist/css/bootstrap.min.css'"/>
+            </t>
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o"> 
+                    <t t-call="l10n_cl_base.cl_internal_clean_layout">
+                       
+                        <style>
+                            .pad_derecha {
+                                padding-right:10px;
+                            }
+                            th, td {
+                                padding-top: 5px;
+                                }
+                            .pad_izquierda {
+                                padding-left: 10px;
+                                
+                          
+                            }
+                            
+                        </style>
+                        <!-- page  es todo lo que esta dentro de una hoja-->
+                        <div class="page" style="margin-top: 10px;" >
+                            <div>
+                                <h3 class ="text-center">Reporte del Contrato</h3>
+                                    <br/>
+                                    <h3 class ="text-center">#<span t-field="o.numero_contrato"/></h3>
+                                <br/>
+                                <div class="container">
+                                    <div class="row">
+                                    
+                                        <div class="col-6"> 
+                                            <br/>
+                                            <b><span>Datos</span></b>
+                                            <br/>
+                                            <table  class="table table-borderless" style="text-align: left;">
+                                                <tr>
+                                                    <td class="pad_izquierda">Nombre del contrato:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.name"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Numero del contrato:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.numero_contrato"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Tipo de contrato:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.tipo_de_contrato"/></td>
+                                                </tr>
+                                            </table>
+                                            <br/>
+                                            <b><span>Fechas</span></b>
+                                            <br/>
+                                            <table class="table table-borderless" style="text-align: left;">
+                                                <tr>
+                                                    <td class="pad_izquierda">Fecha de ingreso al sistema:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.create_date"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Fecha de inicio del contrato:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.fecha_inicio"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Fecha de recepción del contrato:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.fecha_recepcion"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">¿Tiene un plazo fijo?</td>
+                                                    <td class="pad_izquierda" t-if="o.tiene_plazofijo">Si</td>
+                                                    <td class="pad_izquierda" t-else="">No</td>
+                                                </tr>
+                                            </table>
+                                            <br/>
+                                            <b><span>Contratos Adjuntos</span></b>
+                                            <br/>
+                                            <table class="table table-borderless" style="text-align: left;">
+                                                <tr>
+                                                    <td class="pad_izquierda">Contrato Borrador: </td>
+                                                    <td class="pad_izquierda"><span t-field="o.contrato_borrador_filename"/></td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="pad_izquierda">Contrato Revisión: </td>
+                                                    <td class="pad_izquierda"><span t-field="o.contrato_revision_filename"/></td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="pad_izquierda">Contrato Firmado: </td>
+                                                    <td class="pad_izquierda"><span t-field="o.contrato_firmados_filename"/></td>
+                                                </tr>
+                                            </table>
+
+
+
+                                        </div>
+                                         <div class="col-6"> 
+                              
+                                            <br/>
+                                            <b><span>Responsable Contrato</span></b>
+                                            <br/>
+                                            <table class="table table-borderless" style="text-align: left;">
+                                                <tr>
+                                                    <td class="pad_izquierda">Compañia:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.company_id"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Concesión:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.concesion_id"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Departamento:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.departamento_id"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Responsable:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.responsable_id"/></td>
+                                                </tr>
+                                            </table>
+                                            <br/>
+                                            <b><span>Contraparte del Contrato</span></b>
+                                            <br/>
+                                            <table class="table table-borderless" style="text-align: left;">
+                                                <tr>
+                                                    <td class="pad_izquierda">¿Es empresa?:</td>
+                                                    <td class="pad_izquierda" t-if="o.es_empresa">Si</td>
+                                                    <td class="pad_izquierda" t-else="">No</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Nombre Contraparte:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.nombre_contraparte"/></td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="pad_izquierda">Rut Contraparte:</td>
+                                                    <td class="pad_izquierda"><span t-field="o.rut_contraparte"/></td>
+                                                </tr>
+                                                
+                                            </table>
+                                            <br />
+                                            <b><span>Recordatorio</span></b>
+                                            <br/>
+                                            <table class="table table-borderless" style="text-align: left;">
+                                                <tr>
+                                                    <td class="pad_izquierda">Activar recordatorio:</td>
+                                                    <td class="pad_izquierda" t-if="o.activar_recordatorio">Si</td>
+                                                    <td class="pad_izquierda" t-else="">No</td>
+                                                </tr>
+                                                <tr t-if="o.activar_recordatorio">
+                                                    <td class="pad_izquierda">Fecha de recordatorio:</td>
+                                                    <td class="pad_izquierda" ><span t-field="o.fecha_recordatorio"/></td>
+                                                </tr>
+                                               
+                                            </table>
+
+                                            <br />
+                                            <b><span t-if="o.state not in ['borrador','revision','firmado']">Expiración</span></b>
+                                            <br/>
+                                            <table class="table table-borderless" style="text-align: left;" t-if="o.state not in ['borrador','revision','firmado']">
+                                                <tr>
+                                                    <td class="pad_izquierda">Solicitud de termino:</td>
+                                                    <td class="pad_izquierda" t-if="o.solicitud_de_termino">Si</td>
+                                                    <td class="pad_izquierda" t-else="">No</td>
+                                                </tr>
+                                                <tr t-if="o.solicitud_de_termino">
+                                                    <td class="pad_izquierda">Fecha ingreso de la solicitud:</td>
+                                                    <td class="pad_izquierda" ><span t-field="o.fecha_solicitud_termino"/></td>
+                                                </tr>
+                                                <tr t-if="o.solicitud_de_termino">
+                                                    <td class="pad_izquierda">Documento de termino:</td>
+                                                    <td class="pad_izquierda" ><span t-field="o.adj_termino_filename"/></td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div style="page-break-after: always;"><br/></div>
+                        <div class="page">
+                            <div class="container">
+                                <br/>
+                                <h3 class="text-center">Comentarios de Estado</h3>
+                                <br/>
+                                <table class="table" style="text-align: left;">
+                                    <thead>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Comentario</th>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Comentario Borrador :</th>
+                                            <td style="white-space: normal;word-break: break-word;" t-if="o.comentario_borrador"><span t-field="o.comentario_borrador"/></td>
+                                            <td t-else="">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Comentario Revisión :</th>
+                                            <td style="marginwhite-space: normal;word-break: break-word;" t-if="o.comentario_revision"><span t-field="o.comentario_revision"/></td>
+                                            <td t-else="">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th >Comentario Firmado :</th>
+                                            <td style="white-space: normal;word-break: break-word;" t-if="o.comentario_firmados"><span t-field="o.comentario_firmados"/></td>
+                                            <td t-else="">-</td>
+                                        </tr>
+
+                                        <tr>
+                                            <th>Comentario Vigente :</th>
+                                            <td  style="white-space: normal;word-break: break-word;" t-if="o.comentario_vigente"><span t-field="o.comentario_vigente"/></td>
+                                            <td t-else="">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Comentario Vencido :</th>
+                                            <td  style="white-space: normal;word-break: break-word;" t-if="o.comentario_vencido"><span t-field="o.comentario_vencido"/></td>
+                                            <td t-else="">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Comentario Finalizado :</th>
+                                            <td  style="white-space: normal;word-break: break-word;" t-if="o.comentario_finalizado"><span t-field="o.comentario_finalizado"/></td>
+                                            <td t-else="">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                               
+                            </div>
+                        </div>
+
+
+
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

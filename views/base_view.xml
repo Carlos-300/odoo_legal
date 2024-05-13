@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+
+    <!-- Contratos  -->
+    <record id="action_open_ingresocontrato" model="ir.actions.act_window">
+      <field name="name">Contratos</field>
+      <field name="res_model">legal.contrato</field>
+      <field name="view_mode">tree,form</field> 
+      <field name="context">{"search_default_filter_activo_state":1}</field> 
+
+    </record>
+
+
+    <!-- Juicios  -->
+    <record id="action_open_juicios" model="ir.actions.act_window">
+      <field name="name">Juicios</field>
+      <field name="res_model">legal.juicio</field>
+      <field name="view_mode">tree,form</field> 
+      <field name="context">{"search_default_filter_activo":1}</field> 
+    </record>
+
+     <!-- INSERTAR EN LA TABLA  -->
+     <record id="action_open_juicios_adjuntos" model="ir.actions.act_window">
+      <field name="name">Juicios adjuntos</field>
+      <field name="res_model">legal.juicio.adjuntos</field> 
+      <field name="view_mode">tree,form</field> 
+
+    </record>
+    
+    <!-- PRINCIPAL-->
+    <menuitem id="legal_menu_id" name="Legal"  groups="l10n_cl_legal_contratos.legal_contrato_group_lector" web_icon="l10n_cl_legal_contratos,static/description/icon.png"/>
+    
+    <!-- BARRA-->
+    <menuitem id="menu_registro" name="Registro Contratos" groups="l10n_cl_legal_contratos.legal_contrato_group_lector" parent="l10n_cl_legal_contratos.legal_menu_id" />
+    <menuitem id="menu_judicial" name="Tramite Judicial" groups="l10n_cl_legal_contratos.legal_contrato_group_lector" parent="l10n_cl_legal_contratos.legal_menu_id" />
+    
+    <!-- ELEMENTOS de la BARRA-->
+    <menuitem id="menu_juicio" name="Juicios" action="action_open_juicios" groups="l10n_cl_legal_contratos.legal_contrato_group_lector" parent="l10n_cl_legal_contratos.menu_judicial" />
+    <menuitem id="menu_Contrato" name="Contratos" action="action_open_ingresocontrato" groups="l10n_cl_legal_contratos.legal_contrato_group_lector" parent="l10n_cl_legal_contratos.menu_registro" />
+    
+  </odoo>

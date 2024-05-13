@@ -1,0 +1,977 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    
+    <record id="view_legal_contrato_juicio_form" model="ir.ui.view">
+        <field name="name">view.contrato.juicio.form</field>
+        <field name="model">legal.juicio</field>
+        <field name="arch" type="xml">
+            <form> 
+                <header>
+                    
+
+                    <button string="Volver a Borrador" type="object" name="btn_borrador" attrs= "{'invisible':['|','|',('state','!=','primera'),('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','discusion_civil')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Borrador" type="object" name="btn_borrador" attrs= "{'invisible':['|','|',('state','!=','primera'),('tipo_laboral','!=','monitorios'),('state_primera_monitorio','!=','audiencia_monitorio')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Borrador" type="object" name="btn_borrador" attrs= "{'invisible':['|','|',('state','!=','primera'),('tipo_laboral','!=','apelacion'),('state_primera_apelacion','!=','preparacion')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Borrador" type="object" name="btn_borrador" attrs= "{'invisible':['|','|',('state','!=','primera'),('tipo_de_juicio','!=','JPL'),('state_primera_jpl','!=','audiencia_jpl')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    
+                    <button string="Pasar a Finalizado" type="object" name="btn_finalizado" attrs= "{'invisible':[('state','not in',['cumplimiento','cancelado'])]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Cancelado" type="object" name="state_Cancelado" attrs= "{'invisible':[('state','=','cancelado')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro de Cancelar?"/>
+                    <button string="Pasar a 1ª Instancia" type="object" name="btn_primera" attrs="{'invisible':[('state','!=','borrador')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <!--button Cumplimiento para cada tipo de juicio -->
+                    <button string="Cumplimiento" type="object" name="state_cumplimiento" attrs="{'invisible':['|',('state','in',['borrador','cumplimiento','finalizado','cancelado']),('cumplir_sentencia','=',False)]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/> 
+                    <button string="Cumplimiento" type="object" name="state_cumplimiento" attrs="{'invisible':['|',('state','in',['borrador','cumplimiento','finalizado','cancelado']),('cumplir_sentencia_monitorio','=',False)]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/> 
+                    <button string="Cumplimiento" type="object" name="state_cumplimiento" attrs="{'invisible':['|',('state','in',['borrador','cumplimiento','finalizado','cancelado']),('cumplir_sentencia_oral','=',False)]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/> 
+                    <button string="Cumplimiento" type="object" name="state_cumplimiento" attrs="{'invisible':['|',('state','in',['borrador','cumplimiento','finalizado','cancelado']),('cumplir_sentencia_jpl','=',False)]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/> 
+                    <button string="Cumplimiento" type="object" name="state_cumplimiento" attrs="{'invisible':['|',('state','in',['borrador','cumplimiento','finalizado','cancelado']),('cumplir_sentencia_segunda','=',False)]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/> 
+                    <button string="Cumplimiento" type="object" name="state_cumplimiento" attrs="{'invisible':['|',('state','in',['borrador','cumplimiento','finalizado','cancelado']),('cumplir_sentencia_corte','=',False)]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/> 
+
+
+                    <field name="state" widget="statusbar" statusbar_visible="borrador,primera,segunda,cortesuprema,cumplimiento,finalizado"/>
+                    <button string="Imprimir Adjuntos" type="object" name="get_stock_file" groups="l10n_cl_legal_contratos.legal_contrato_group_admin"/>
+                </header>
+                <header>
+                    <!-- Banderas para las cortes -->
+                    <field name="bandera_primera" invisible="1"/>
+                    <field name="bandera_segunda"  invisible="1"/>
+                    <field name="bandera_cortesuprema"  invisible="1"/>
+                    <!-- estados dentro de las instancias-->
+                    <button string="1ª Instancia" type="object" name="btn_primera" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','ingreso_recurso')] }" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+
+                    <!-- Estado de 1ª instancia civil--> 
+                    <field name="state_primera_civil" widget="statusbar" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state','!=','primera')]}"/> 
+
+                    <!-- volver-->
+                    <button string="Volver a Discución" type="object" name="primera_discusion" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','prueba_civil'),('state','!=','primera')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Pruebas" type="object" name="primera_prueba" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','sentencia_civil'),('state','!=','primera')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Sentencia" type="object" name="primera_sentencia" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','recursos_civil'),('state','!=','primera')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <!-- pasar-->
+                    <button string="Pasar a Pruebas" type="object" name="primera_prueba" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','discusion_civil'),('state','!=','primera')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Sentencia" type="object" name="primera_sentencia" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','prueba_civil'),('state','!=','primera')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Recursos" type="object" name="recurso_civil" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','sentencia_civil'),('state','!=','primera')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                   
+
+                    <!-- Estado de 1ª instancia laboral-->
+                    <field name="state_primera_monitorio" widget="statusbar" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','laboral'),('state','!=','primera'),('tipo_laboral','!=','monitorios')]}"/>                
+                   
+                    <!-- volver-->
+                    <button string="Volver a Audiencia" type="object" name="primera_audiencia_unica" attrs="{'invisible':['|','|','|',('tipo_de_juicio','!=','laboral'),('tipo_laboral','!=','monitorios'),('state_primera_monitorio','=','audiencia_monitorio'),('state','!=','primera')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <!-- pasar -->
+                    <button string="Pasar a Recursos" type="object" name="recurso_monitorio" attrs="{'invisible':['|','|','|',('tipo_de_juicio','!=','laboral'),('tipo_laboral','!=','monitorios'),('state_primera_monitorio','=','recursos_monitorio'),('state','!=','primera')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    
+
+
+                    <field name="state_primera_apelacion" widget="statusbar" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','laboral'),('state','!=','primera'),('tipo_laboral','!=','apelacion')]}"/>  
+                    
+                    <!-- volver-->
+                    <button string="Volver a Audiencia de Preparacion" type="object" name="primera_audiencia_preparacion" attrs="{'invisible':['|','|','|',('tipo_de_juicio','!=','laboral'),('tipo_laboral','!=','apelacion'),('state','!=','primera'),('state_primera_apelacion','!=','audiencia_apelacion')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Audiencia de juicio oral" type="object" name="primera_audiencia_oral" attrs="{'invisible':['|','|','|',('tipo_de_juicio','!=','laboral'),('tipo_laboral','!=','apelacion'),('state','!=','primera'),('state_primera_apelacion','!=','recursos_apelacion')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+
+                    <!-- pasar-->                    
+                    <button string="Pasar a Audiencia de juicio oral" type="object" name="primera_audiencia_oral" attrs="{'invisible':['|','|',('tipo_laboral','!=','apelacion'),('state','!=','primera'),('state_primera_apelacion','!=','preparacion')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Recursos" type="object" name="recurso_apelacion" attrs="{'invisible':['|','|',('tipo_laboral','!=','apelacion'),('state','!=','primera'),('state_primera_apelacion','!=','audiencia_apelacion')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    
+
+
+                    <!-- Estados de 1ª instancia jpl-->
+                    <field name="state_primera_jpl" widget="statusbar" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state','!=','primera')]}"/>        
+                   
+                    <!-- volver-->
+                    <button string="Volver a Audiencia" type="object" name="primera_audiencia_jpl" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','JPL'),('state','!=','primera'),('state_primera_jpl','!=','sentencia_jpl')]}" class=" oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Sentencia" type="object" name="primera_sentencia_jpl" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','JPL'),('state','!=','primera'),('state_primera_jpl','!=','recursos_jpl')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+
+                    <!-- pasar-->
+                    <button string="Pasar a Sentencia" type="object" name="primera_sentencia_jpl" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','JPL'),('state','!=','primera'),('state_primera_jpl','!=','audiencia_jpl')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Recursos" type="object" name="primera_recursos_jpl" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','JPL'),('state','!=','primera'),('state_primera_jpl','!=','sentencia_jpl')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    
+                    <!-- boton para pasar a la corte de apelaciones de los distintos tipos de status de 1 instancia-->
+                    <button string="Ir a Corte de Apelaciones" type="object" name="btn_segunda" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','recursos_civil'),('state','!=','primera')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Ir a Corte de Apelaciones" type="object" name="btn_segunda" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','laboral'),('state_primera_monitorio','!=','recursos_monitorio'),('state','!=','primera')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Ir a Corte de Apelaciones" type="object" name="btn_segunda" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','laboral'),('state_primera_apelacion','!=','recursos_apelacion'),('state','!=','primera')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Ir a Corte de Apelaciones" type="object" name="btn_segunda" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','!=','recursos_jpl'),('state','!=','primera')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                   
+                    <!-- estados de la 2ªinstancia-->
+                    <field name="state_segunda" widget="statusbar" attrs="{'invisible':[('state','!=','segunda')]}"/>  
+                   
+                    <!-- volver-->
+                    <button string="Volver a Ingresos de Recursos" type="object" name="btn_ingreso_recurso" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','auto_relacion')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Autos en relación" type="object" name="btn_auto_relacion" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','inclusion_tabla')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Clusion en tabla" type="object" name="btn_inclusion_tabla" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','sentencia_segunda')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Sentencia" type="object" name="btn_sentencia_segunda" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','recursos_segunda')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                   
+                    <!-- pasar-->
+                    <button string="Pasar a Autos en relación" type="object" name="btn_auto_relacion" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','ingreso_recurso')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Inclusión en tabla" type="object" name="btn_inclusion_tabla" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','auto_relacion')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Sentencia" type="object" name="btn_sentencia_segunda" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','inclusion_tabla')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Recursos" type="object" name="btn_recursos_segunda" attrs="{'invisible':['|',('state','!=','segunda'),('state_segunda','!=','sentencia_segunda')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                   
+                    <button string="Volver a Corte de Apelaciones" type="object" name="btn_segunda" attrs="{'invisible':['|',('state_corte','!=','ingreso_recurso_corte'),('state','!=','cortesuprema')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Ir a Corte Suprema" type="object" name="btn_corte" attrs="{'invisible':['|',('state','!=','segunda'), ('state_segunda','!=' ,'recursos_segunda')] }" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                   
+                    <field name="state_corte" widget="statusbar" attrs="{'invisible':[('state','!=','cortesuprema')]}"/>
+                    <!-- Volver-->
+                    <button string="Volver a Ingreso Recursos" type="object" name="btn_ingreso_recurso_corte" attrs="{'invisible':['|',('state','!=','cortesuprema'),('state_corte','!=','auto_relacion_corte')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Autos en relacón" type="object" name="btn_auto_relacion_corte" attrs="{'invisible':['|',('state','!=','cortesuprema'),('state_corte','!=','inclusion_tabla_corte')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Volver a Causa en Tabla" type="object" name="btn_inclusion_tabla_corte" attrs="{'invisible':['|',('state','!=','cortesuprema'),('state_corte','!=','sentencia_final')]}" class="oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+
+                    <!-- Pasar-->
+                    <button string="Pasar a Autos en relacón" type="object" name="btn_auto_relacion_corte" attrs="{'invisible':['|',('state','!=','cortesuprema'),('state_corte','!=','ingreso_recurso_corte')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Causa en Tabla" type="object" name="btn_inclusion_tabla_corte" attrs="{'invisible':['|',('state','!=','cortesuprema'),('state_corte','!=','auto_relacion_corte')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+                    <button string="Pasar a Sentencia Final" type="object" name="btn_sentencia_final" attrs="{'invisible':['|',('state','!=','cortesuprema'),('state_corte','!=','inclusion_tabla_corte')]}" class="btn btn-primary oe_read_only" groups="l10n_cl_legal_contratos.legal_contrato_group_admin" confirm="¿ Esta seguro ?"/>
+             
+                
+                </header>
+                <sheet>
+
+                    <!-- poner todos los datos de la demanda en caratula-->
+                    <group>
+                        <group >
+                            <separator string="Datos del juicio" colspan="2"/>
+                            <field name="name" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="numero_juicio" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="create_date" string="Fecha de ingreso al sistema"   widget="date"/>
+                            <field name="fecha_juicio" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="peticion_juicio" attrs="{'readonly':[('state','!=','borrador')]}"/>
+
+                            <separator string="Notificación" colspan="2"/>
+                            <field name="notificado" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="fecha_notificacion" attrs="{'required':[('notificado','=',True)],'invisible':[('notificado','=',False)],'readonly':[('state','!=','borrador')]}"/>
+
+                            <separator string="Reconvención" colspan="2" attrs="{'invisible':[('tipo_de_juicio','=','JPL')]}"/> 
+                            <field name="es_reconvencion" attrs="{'invisible':[('tipo_de_juicio','=','JPL')],'readonly':[('state','!=','borrador')] }"/>
+                            <field name="reconvencion_id"  attrs="{'required':[('es_reconvencion','=',True)],'invisible':[('es_reconvencion','=',False)],'readonly':[('state','!=','borrador')] }" options="{'no_create':True, 'no_open':True}"/>
+                              
+                            <!--Si la tabla tiene un text la tabla tomara su ancho para poder mostrarlo 
+                            por ende al mismo campo le damos un white-space: pre-line; word-wrap: break-word; max-width: 150px; 
+                            con esto generamos un salto de linea y un max ancho  -->
+                            
+                            
+                        </group>
+                        <group >
+                            <separator string="Identificación de las Partes" />
+                            <field name="company_id" options="{'no_create':True, 'no_open':True}" readonly="1"/>
+                            <field name="representante" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="correo_representante" attrs="{'readonly':[('state','!=','borrador')]}"/>
+
+                            <separator />
+                            <field name="nombre_contraparte" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="direccion_contraparte" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="correo_contraparte" type="email" attrs="{'readonly':[('state','!=','borrador')]}"/>
+
+                            <separator string="Jurisdicción"/>
+                            <field name="tipo_de_juicio" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="tipo_laboral" attrs="{'readonly':[('state','!=','borrador')],'required':[('tipo_de_juicio','=','laboral')],'invisible':[('tipo_de_juicio','!=','laboral')] }"/>
+                            <field name="corte" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                            <field name="tribunal" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                        </group>
+                    </group> 
+
+                    <group colspan="2">
+                        <separator string="Reconvenciones Asociadas" colspan="2" attrs="{'invisible':[('tipo_de_juicio','=','JPL')]}"/> 
+
+                        <field name="hijos_reconvencion_ids"  colspan="2" style="max-width: 98%;"  nolabel="1" attrs="{'invisible':[('tipo_de_juicio','=','JPL')] }" readonly="1" options="{'no_create':True, 'no_open':True}">
+                            <tree>
+                                <field name="name" style="white-space: pre-line; word-wrap: break-word;"/>
+                                <field name="numero_juicio"/>
+                                <field name="create_date" widget="date" string="Fecha"/>
+                                <field name="tipo_de_juicio"/>
+                                <field name="state"/>
+                            </tree>
+                        </field>
+
+                        <separator string="Escrito de demanda" colspan="2"/>
+                        <field name="motivo_demanda"   attrs="{'readonly':[('state','!=','borrador')]}"/>
+                        <field name="reclamos_legales" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                        <field name="fundamentos_legales" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                        <field name="peticion" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                        <field name="rebeldia" attrs="{'readonly':[('state','!=','borrador')]}"/>
+                    </group>
+                    
+                    
+                    <notebook>
+                        <page string="1ª Instancia" attrs="{'invisible':[('state','=','borrador')]}">
+                            <group>
+                                <group>
+                                    <!-- requerido si no es laboral-->
+                                    <separator string="Conciliaciones" colspan="2"/> 
+                                    <field name="conciliacion_primera" attrs="{'readonly':[('state','!=','primera')]}" />
+                                    <field name="text_cociliacion_primera"  attrs="{'invisible':[('conciliacion_primera','=',False)],'required':[('conciliacion_primera','=',True)],'readonly':[('state','!=','primera')]}"/>
+                                    <field name="adjunto_conciliacion_primera" filename="adjunto_conciliacion_primera_filename"  attrs="{'invisible':[('conciliacion_primera','=',False)],'required':[('conciliacion_primera','=',True)]}"/>
+                                    <field name="adjunto_conciliacion_primera_filename" invisible="1"/>
+                                    
+                                </group>
+                                <group>
+                                    <separator colspan="2" string="Aplazamiento" attrs="{'invisible':[('tipo_de_juicio','=','laboral')]}"/>
+                                    <field name="tiene_aplazamiento" attrs="{'invisible':[('tipo_de_juicio','=','laboral')],'readonly':[('state','!=','primera')]}" />
+                                    <field name="text_aplazamiento"  attrs="{'invisible':[('tiene_aplazamiento','=',False)],'readonly':[('state','!=','primera')],'required':[('tiene_aplazamiento','=',True)]}"/>
+                                    <field name="fecha_aplazamiento" attrs="{'invisible':[('tiene_aplazamiento','=',False)],'readonly':[('state','!=','primera')],'required':[('tiene_aplazamiento','=',True)]}"/>
+                                </group>
+                            </group>
+                            <!--             CIVIL                  -->
+                            <group attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}">
+                                <!-- <separator  colspan="2" string="Discusión" attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}"/>  -->
+                                <h4 colspan="2" class="text-primary"  attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}" >Discusión</h4>
+                                <group>
+                                    <separator  colspan="2" string="Comentarios" attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}"/> 
+                                    <field name="text_discusion_civil_ids" style="max-width: 95%;" colspan="2" nolabel="1" attrs="{'invisible':[('tipo_de_juicio','!=','civil')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','civil'),('state_primera_civil','=','discusion_civil')],'readonly':[('state_primera_civil','!=','discusion_civil')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="comentario" style="white-space: normal;word-break: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary"  attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','civil') ,('parent.state_primera_civil','!=','discusion_civil')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <separator  colspan="2" string="Adjuntos" attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}"/> 
+                                    <field name="adj_discusion_civil_ids" style="max-width: 95%;" nolabel="1" colspan="2"  attrs="{'invisible':[('tipo_de_juicio','!=','civil')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','civil'),('state_primera_civil','=','discusion_civil')],'readonly':[('state_primera_civil','!=','discusion_civil')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <!-- estado_principal == state
+                                            estado_ejecutado == segunda barra -->
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary"  attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','civil') ,('parent.state_primera_civil','!=','discusion_civil')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}">    
+                                <!-- <separator colspan="2" string="Pruebas" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','=','discusion_civil')]}" /> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','=','discusion_civil')]}"  >Pruebas</h4>
+                                <group>    
+                                    <separator colspan="2" string="Comentario" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','=','discusion_civil')]}" />
+                                    <field name="text_prueba_civil_ids" colspan="2" style="max-width: 95%;"  nolabel="1" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','=','discusion_civil')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','civil'),('state_primera_civil','=','prueba_civil')] ,'readonly':[('state_primera_civil','!=','prueba_civil')] }">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','civil') ,('parent.state_primera_civil','!=','prueba_civil')]}" />
+                                        </tree>
+                                    </field>                                 
+                                </group>
+                                <group>
+                                    <separator colspan="2" string="Adjuntos" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','=','discusion_civil')]}" />
+                                    <field name="adj_prueba_civil_ids" nolabel="1" style="max-width: 95%;"  colspan="2" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','=','discusion_civil')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','civil'),('state_primera_civil','=','prueba_civil')] ,'readonly':[('state_primera_civil','!=','prueba_civil')] }">
+                                        <tree editable="bottom"  delete="false"   >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','civil') ,('parent.state_primera_civil','!=','prueba_civil')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group  attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}">
+                                <!-- <separator colspan="2"  string="Sentencia" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','not in',['sentencia_civil','recursos_civil'])]}"/> -->
+                                <h4 colspan="2" class="text-primary"  attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','not in',['sentencia_civil','recursos_civil'])]}">Sentencia</h4>
+                                <field name="cumplir_sentencia" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','not in',['sentencia_civil','recursos_civil'])]}"/> 
+                            </group>
+                            <group attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}">  
+                                <group>     
+                                    <h5 colspan="2"  string="Comentarios" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','not in',['sentencia_civil','recursos_civil'])]}">Comentarios</h5>
+                                    <field name="text_sentencia_civil_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','not in',['sentencia_civil','recursos_civil'])],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','civil'),('state_primera_civil','=','sentencia_civil')] ,'readonly':[('state_primera_civil','!=','sentencia_civil')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','civil'),('parent.state_primera_civil','!=','sentencia_civil')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','not in',['sentencia_civil','recursos_civil'])]}">Adjuntos</h5>
+                                    <field name="adj_sentencia_civil_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','not in',['sentencia_civil','recursos_civil'])],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','civil'),('state_primera_civil','=','sentencia_civil')] ,'readonly':[('state_primera_civil','!=','sentencia_civil')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','civil'),('parent.state_primera_civil','!=','sentencia_civil')]}"/>
+                                            
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+
+                            <group attrs="{'invisible':[('tipo_de_juicio','!=','civil')]}">     
+                                <!-- <separator colspan="2" string="Recursos" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','recursos_civil'),('state_primera_civil','!=','recursos_civil')]}" /> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','recursos_civil'),('state_primera_civil','!=','recursos_civil')]}" >Recursos</h4>
+                                <group>   
+                                    <separator colspan="2" string="Comentarios" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','recursos_civil'),('state_primera_civil','!=','recursos_civil')]}" />
+                                    <field name="text_recursos_civil_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','recursos_civil')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','civil'),('state_primera_civil','=','recursos_civil')] ,'readonly':[('state','!=','primera')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','!=','primera')]}"/>
+                                        </tree>
+                                    </field>                                 
+                                </group>
+                                <group>
+                                    <separator colspan="2" string="Adjuntos" attrs="{'invisible':['|','|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','recursos_civil'),('state_primera_civil','!=','recursos_civil')]}" />
+                                    <field name="adj_recursos_civil_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':['|',('tipo_de_juicio','!=','civil'),('state_primera_civil','!=','recursos_civil')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','civil'),('state_primera_civil','=','recursos_civil')] ,'readonly':[('state','!=','primera')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','!=','primera')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <!--            MONITORIOS               -->
+                           
+                            <group attrs="{'invisible':[('tipo_laboral','!=','monitorios')]}">
+                                <!-- <separator  colspan="2" string="Audiencia" attrs="{'invisible':[('tipo_laboral','!=','monitorios')]}"/>  -->
+                                <h4 colspan="2" class="text-primary"  attrs="{'invisible':[('tipo_laboral','!=','monitorios')]}" >Audiencia</h4>
+                                <field name="cumplir_sentencia_monitorio"  attrs="{'invisible':[('tipo_laboral','!=','monitorios')],'required':[('tipo_laboral','=','monitorios'),('state_primera_monitorio','=','audiencia_monitorio')] ,'readonly':[('state_primera_monitorio','!=','audiencia_monitorio')]}" />
+                            </group>
+                            <group attrs="{'invisible':[('tipo_laboral','!=','monitorios')]}">
+                                <group>
+                                    <h5  colspan="2" class="text-primary" attrs="{'invisible':[('tipo_laboral','!=','monitorios')]}">Comentarios</h5>
+                                    <field name="text_audiencia_monitorio_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':[('tipo_laboral','!=','monitorios')],'required':[('tipo_laboral','=','monitorios'),('state_primera_monitorio','=','audiencia_monitorio')] ,'readonly':[('state_primera_monitorio','!=','audiencia_monitorio')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','monitorios') ,('parent.state_primera_monitorio','!=','audiencia_monitorio')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5  colspan="2" class="text-primary" attrs="{'invisible':[('tipo_laboral','!=','monitorios')]}">Adjuntos</h5> 
+                                    <field name="adj_audiencia_monitorio_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':[('tipo_laboral','!=','monitorios')],'required':[('tipo_laboral','=','monitorios'),('state_primera_monitorio','=','audiencia_monitorio')] ,'readonly':[('state_primera_monitorio','!=','audiencia_monitorio')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','monitorios') ,('parent.state_primera_monitorio','!=','audiencia_monitorio')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>        
+                            <group attrs="{'invisible':[('tipo_laboral','!=','monitorios')]}">
+                                <!-- <separator  string="Recursos" colspan="2" attrs="{'invisible':['|',('tipo_laboral','!=','monitorios'),('state_primera_monitorio','!=','recursos_monitorio')]}"/> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':['|',('tipo_laboral','!=','monitorios'),('state_primera_monitorio','!=','recursos_monitorio')]}" >Recursos</h4>
+                                <group>
+                                    <separator  string="Comentarios" colspan="2" attrs="{'invisible':['|',('tipo_laboral','!=','monitorios'),('state_primera_monitorio','!=','recursos_monitorio')]}"/>
+                                    <field name="text_recursos_monitorio_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_laboral','!=','monitorios'),('state_primera_monitorio','!=','recursos_monitorio')],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','monitorios'),('state_primera_monitorio','=','recursos_monitorio')] ,'readonly':[('state','!=','primera')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_laboral','!=','monitorios'),('parent.state_primera_monitorio','!=','recursos_monitorio')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <separator  string="Adjuntos" colspan="2" attrs="{'invisible':['|',('tipo_laboral','!=','monitorios'),('state_primera_monitorio','!=','recursos_monitorio')]}"/>
+                                    <field name="adj_recursos_monitorio_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_laboral','!=','monitorios'),('state_primera_monitorio','!=','recursos_monitorio')],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','monitorios'),('state_primera_monitorio','=','recursos_monitorio')] ,'readonly':[('state','!=','primera')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_laboral','!=','monitorios'),('parent.state_primera_monitorio','!=','recursos_monitorio')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>  
+
+                            <!--            APELACIONES             -->    
+                            <group attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }">
+                                <!-- <separator string="Audiencia de preparación de juicio oral" colspan="2" attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }"/> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }" >Audiencia de preparación de juicio oral</h4>
+                                <field name="fecha_oral"  attrs="{'invisible':[('tipo_laboral','!=','apelacion')],'required':[('state','=','primera'),('conciliacion_primera','=',False),('tipo_laboral','=','apelacion'),('state_primera_apelacion','=','preparacion')] ,'readonly':[('state_primera_apelacion','!=','preparacion')]}"/>
+                            </group>
+                            <group attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }">
+                                <group>
+                                    <h5 class="text-primary" colspan="2" attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }">Comentarios</h5>
+                                    <field name="text_preparacion_apelacion_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':[('tipo_laboral','!=','apelacion')],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','apelacion'),('state_primera_apelacion','=','preparacion')] ,'readonly':[('state_primera_apelacion','!=','preparacion')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_laboral','!=','apelacion') ,('parent.state_primera_apelacion','!=','preparacion')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 class="text-primary" colspan="2" attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }">Adjuntos</h5>
+                                    <field name="adj_preparacion_ids" colspan="2" style="max-width: 95%;"  nolabel="1" attrs="{'invisible':[('tipo_laboral','!=','apelacion')],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','apelacion'),('state_primera_apelacion','=','preparacion')] ,'readonly':[('state_primera_apelacion','!=','preparacion')]}">
+                                        <tree editable="bottom" delete="false" > 
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_laboral','!=','apelacion') ,('parent.state_primera_apelacion','!=','preparacion')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }">
+                                <!-- <separator colspan="2" string="Audiencia juicio Oral" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])] }"/> -->
+                                <h4 colspan="2" class="text-primary"  attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])] }" >Audiencia juicio Oral</h4>
+                                <field name="solicitud_receso"  attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','apelacion'),('state_primera_apelacion','=','audiencia_apelacion')] ,'readonly':[('state_primera_apelacion','!=','audiencia_apelacion')]}"/>
+                                <field name="fecha_receso"  attrs="{'invisible':['|','|',('solicitud_receso','!=',True),('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])],'required':[('conciliacion_primera','=',False),('solicitud_receso','=',True)] ,'readonly':[('state_primera_apelacion','!=','audiencia_apelacion')]}"/>
+                                <field name="cumplir_sentencia_oral"   attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])],'readonly':[('state_primera_apelacion','!=','audiencia_apelacion')]}" />
+                            </group>
+                            <group attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }">
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])] }">Comentarios</h5>
+                                    <field name="text_audiencia_apelacion_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','apelacion'),('state_primera_apelacion','=','audiencia_apelacion')] ,'readonly':[('state_primera_apelacion','!=','audiencia_apelacion')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_laboral','!=','apelacion'),('parent.state_primera_apelacion','!=','audiencia_apelacion')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])] }">Adjuntos</h5>
+                                    <field name="adj_audiencia_apelacion_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','not in',['recursos_apelacion','audiencia_apelacion'])],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','apelacion'),('state_primera_apelacion','=','audiencia_apelacion')] ,'readonly':[('state_primera_apelacion','!=','audiencia_apelacion')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_laboral','!=','apelacion'),('parent.state_primera_apelacion','!=','audiencia_apelacion')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group attrs="{'invisible':[('tipo_laboral','!=','apelacion')] }">
+                                <!-- <separator colspan="2" string="Recursos" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','!=','recursos_apelacion')] }"/> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','!=','recursos_apelacion')] }" >Recursos</h4>
+                                <group>
+                                    <separator colspan="2" string="Comentarios" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','!=','recursos_apelacion')] }"/>
+                                    <field name="text_recursos_apelacion_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','!=','recursos_apelacion')],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','apelacion'),('state_primera_apelacion','=','recursos_apelacion')] ,'readonly':[('state','!=','primera')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_laboral','!=','apelacion'),('parent.state_primera_apelacion','!=','recursos_apelacion')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <separator colspan="2" string="Adjuntos" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','!=','recursos_apelacion')] }"/>
+                                    <field name="adj_recursos_apelacion_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':['|',('tipo_laboral','!=','apelacion'),('state_primera_apelacion','!=','recursos_apelacion')],'required':[('conciliacion_primera','=',False),('tipo_laboral','=','apelacion'),('state_primera_apelacion','=','recursos_apelacion')] ,'readonly':[('state','!=','primera')]}">
+                                        <tree editable="bottom" delete="false">
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_laboral','!=','apelacion'),('parent.state_primera_apelacion','!=','recursos_apelacion')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <!--            JPL            -->    
+                            <group attrs="{'invisible':[('tipo_de_juicio','!=','JPL')]}">
+                                <!-- <separator  string="Audiencia" colspan="2" attrs="{'invisible':[('tipo_de_juicio','!=','JPL')]}"/>  -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':[('tipo_de_juicio','!=','JPL')]}" >Audiencia</h4>
+                                <group>
+                                    <separator  string="Comentarios" colspan="2" attrs="{'invisible':[('tipo_de_juicio','!=','JPL')]}"/> 
+                                    <field name="text_audiencia_jpl_ids" colspan="2" style="max-width: 95%;"  nolabel="1" attrs="{'invisible':[('tipo_de_juicio','!=','JPL')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','JPL'),('state_primera_jpl','=','audiencia_jpl')] ,'readonly':[('state_primera_jpl','!=','audiencia_jpl')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','JPL') ,('parent.state_primera_jpl','!=','audiencia_jpl')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <separator  string="Adjuntos" colspan="2" attrs="{'invisible':[('tipo_de_juicio','!=','JPL')]}"/> 
+                                    <field name="adj_audiencia_jpl_ids" colspan="2" style="max-width: 95%;"  nolabel="1" attrs="{'invisible':[('tipo_de_juicio','!=','JPL')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','JPL'),('state_primera_jpl','=','audiencia_jpl')] ,'readonly':[('state_primera_jpl','!=','audiencia_jpl')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','JPL') ,('parent.state_primera_jpl','!=','audiencia_jpl')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>  
+                            <group attrs="{'invisible':[('tipo_de_juicio','!=','JPL')]}">
+                                <!-- <separator colspan="2"  string="Sentencia" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','not in',['sentencia_jpl','recursos_jpl'])]}"/> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','not in',['sentencia_jpl','recursos_jpl'])]}" >Sentencia</h4>
+                                <field name="cumplir_sentencia_jpl"  attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','not in',['sentencia_jpl','recursos_jpl'])],'readonly':[('state_primera_jpl','!=','sentencia_jpl')] }" />
+                            </group>
+                            <group attrs="{'invisible':[('tipo_de_juicio','!=','JPL')]}">
+                                <group>
+                                    <h5 colspan="2"  class="text-primary" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','not in',['sentencia_jpl','recursos_jpl'])]}">Comentarios</h5>
+                                    <field name="text_sentencia_jpl_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','not in',['sentencia_jpl','recursos_jpl'])],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','JPL'),('state_primera_jpl','=','sentencia_jpl')] ,'readonly':[('state_primera_jpl','!=','sentencia_jpl')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','JPL'),('parent.state_primera_jpl','!=','sentencia_jpl')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 colspan="2"  class="text-primary" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','not in',['sentencia_jpl','recursos_jpl'])]}">Adjuntos</h5>
+                                    <field name="adj_sentencia_jpl_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','not in',['sentencia_jpl','recursos_jpl'])],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','JPL'),('state_primera_jpl','=','sentencia_jpl')] ,'readonly':[('state_primera_jpl','!=','sentencia_jpl')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','JPL'),('parent.state_primera_jpl','!=','sentencia_jpl')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>    
+                            <group attrs="{'invisible':[('tipo_de_juicio','!=','JPL')]}">
+                                <!-- <separator colspan="2"  string="Recursos" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','!=','recursos_jpl')] }" /> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','!=','recursos_jpl')] }" >Recursos</h4>
+                                <group>
+                                    <separator colspan="2"  string="Comentarios" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','!=','recursos_jpl')] }" />
+                                    <field name="text_recursos_jpl_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','!=','recursos_jpl')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','JPL'),('state_primera_jpl','=','recursos_jpl')] ,'readonly':[('state','!=','primera')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','JPL'),('parent.state_primera_jpl','!=','recursos_jpl')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <separator colspan="2"  string="Adjuntos" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','!=','recursos_jpl')] }" />
+                                    <field name="adj_recursos_jpl_ids" nolabel="1" style="max-width: 95%;"  colspan="2" attrs="{'invisible':['|',('tipo_de_juicio','!=','JPL'),('state_primera_jpl','!=','recursos_jpl')],'required':[('conciliacion_primera','=',False),('tipo_de_juicio','=','JPL'),('state_primera_jpl','=','recursos_jpl')] ,'readonly':[('state','!=','primera')]}">
+                                        <tree editable="bottom" delete="false">
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|','|',('parent.state','!=','primera'),('parent.tipo_de_juicio','!=','JPL'),('parent.state_primera_jpl','!=','recursos_jpl')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>    
+                        </page>
+                        <page string="Corte de Apelaciones" attrs="{'invisible':[('bandera_segunda','=',False)]}">
+                            <group>
+                                <group>
+                                    <separator colspan="2"  string="Conciliaciones" />
+                                    <field name="conciliacion_segunda"  attrs="{'readonly':[('state','!=','segunda')]}" />
+                                    <field name="text_cociliacion_segunda"  attrs="{'invisible':[('conciliacion_segunda','=',False)],'required':[('conciliacion_segunda','=',True)]}"/>
+                                    <field name="adjunto_conciliacion_segunda" filename="adjunto_conciliacion_segunda_filename" attrs="{'invisible':[('conciliacion_segunda','=',False)],'required':[('conciliacion_segunda','=',True)]}"/>
+                                    <field name="adjunto_conciliacion_segunda_filename" invisible="1"/>
+                                </group>
+                                <group>
+                                    <separator colspan="2" string="Aplazamiento"/>
+                                    <field name="aplazamiento_segunda" attrs="{'readonly':[('state','!=','segunda')]}"/>
+                                    <field name="text_aplazamiento_segunda"  style="white-space: normal;word-break: break-word;" attrs="{'required':[('aplazamiento_segunda','=',True)],'invisible':['|',('aplazamiento_segunda','=',False),('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])]}"/>
+                                    <field name="fecha_aplazamiento_segunda" attrs="{'required':[('aplazamiento_segunda','=',True)],'invisible':['|',('aplazamiento_segunda','=',False),('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])]}"/>
+                                </group>
+                            </group>
+                            <group>
+                                 <!-- <separator colspan="2" string="Ingreso del Recurso"/> -->
+                                <h4 colspan="2" class="text-primary">Ingreso del Recurso</h4>
+                                <field name="fecha_ingreso_recurso_seg" attrs="{'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','ingreso_recurso')] ,'readonly':[('state_segunda','!=','ingreso_recurso')]}"/>  
+                            </group>
+                            <group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary">Comentarios</h5>
+                                    <field name="text_ingreso_segunda_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','ingreso_recurso')] ,'readonly':[('state_segunda','!=','ingreso_recurso')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','segunda'),('parent.state_segunda','!=','ingreso_recurso')]}" />         
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary">Adjuntos</h5>
+                                    <field name="adj_ingreso_recurso_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','ingreso_recurso')] ,'readonly':[('state_segunda','!=','ingreso_recurso')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','segunda'),('parent.state_segunda','!=','ingreso_recurso')]}" />         
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+
+                            <group  attrs="{'invisible':[('state_segunda','not in',['auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda'])]}">
+                                <!-- <separator colspan="2" string="Autos en Relación" attrs="{'invisible':[('state_segunda','not in',['auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda'])]}"/> -->
+                                <h4  colspan="2" class="text-primary" attrs="{'invisible':[('state_segunda','not in',['auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda'])]}">Autos en Relación</h4>
+                                <group>
+                                    <separator colspan="2" string="Comentarios" attrs="{'invisible':[('state_segunda','not in',['auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda'])]}"/>
+                                    <field name="text_auto_relacion_segunda_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':[('state_segunda','not in',['auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda'])],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','auto_relacion')] ,'readonly':[('state_segunda','!=','auto_relacion')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','segunda'),('parent.state_segunda','!=','auto_relacion')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <separator colspan="2" string="Adjuntos" attrs="{'invisible':[('state_segunda','not in',['auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda'])]}"/>
+                                    <field name="adj_auto_relacion_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':[('state_segunda','not in',['auto_relacion','inclusion_tabla','sentencia_segunda','recursos_segunda'])],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','auto_relacion')] ,'readonly':[('state_segunda','!=','auto_relacion')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','segunda'),('parent.state_segunda','!=','auto_relacion')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group attrs="{'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])]}">
+                                <!-- <separator colspan="2" string="Causa en Tabla" attrs="{'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])]}"/> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])]}">Causa en Tabla</h4>
+                                <field name="fecha_causa_tabla" attrs="{ 'readonly':[('state','!=','segunda')],'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','inclusion_tabla')]}"/>  
+                            </group>
+                            <group  attrs="{'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])]}">
+                                <group>
+                                    <h5 colspan="2" class="text-primary"  attrs="{'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])]}">Comentarios</h5 >
+                                    <field name="text_inclusion_tabla_segunda_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'readonly':[('state','!=','segunda')],'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','inclusion_tabla')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','!=','segunda')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group >
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])]}">Adjuntos</h5>
+                                    <field name="adj_inclusion_tabla_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'readonly':[('state','!=','segunda')],'invisible':[('state_segunda','not in',['inclusion_tabla','sentencia_segunda','recursos_segunda'])],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','inclusion_tabla')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','!=','segunda')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])]}">
+                                <!-- <separator colspan="2" string="Sentencia" attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])]}"/> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])]}">Sentencia</h4>
+                                <field name="cumplir_sentencia_segunda"   attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])],'readonly':[('state_segunda','!=','sentencia_segunda')]}"/>  
+                            </group>
+                            <group attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])]}">
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])]}">Comentarios</h5>
+                                    <field name="text_sentencia_segunda_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','sentencia_segunda')] ,'readonly':[('state_segunda','!=','sentencia_segunda')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','segunda'),('parent.state_segunda','!=','sentencia_segunda')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])]}">Adjuntos</h5>
+                                    <field name="adj_sentencia_segunda_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':[('state_segunda','not in',['sentencia_segunda','recursos_segunda'])],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','sentencia_segunda')] ,'readonly':[('state_segunda','!=','sentencia_segunda')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','segunda'),('parent.state_segunda','!=','sentencia_segunda')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group attrs="{'invisible':[('state_segunda','!=','recursos_segunda')]}">
+                                <!-- <separator colspan="2" string="Recursos" attrs="{'invisible':[('state_segunda','!=','recursos_segunda')]}"/> -->
+                                <h4 colspan="2" class="text-primary"  attrs="{'invisible':[('state_segunda','!=','recursos_segunda')]}">Recursos</h4>
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':[('state_segunda','!=','recursos_segunda')]}">Comentarios</h5>
+                                    <field name="text_recursos_segunda_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':[('state_segunda','!=','recursos_segunda')],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','recursos_segunda')] ,'readonly':[('state','!=','segunda')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','!=','segunda')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <t5 colspan="2" class="text-primary"  attrs="{'invisible':[('state_segunda','!=','recursos_segunda')]}">Adjuntos</t5>
+                                    <field name="adj_recursos_segunda_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':[('state_segunda','!=','recursos_segunda')],'required':[('conciliacion_segunda','=', False),('state','=','segunda'),('state_segunda','=','recursos_segunda')] ,'readonly':[('state','!=','segunda')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','!=','segunda')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+
+                        </page>
+                        <page string="Corte Suprema" attrs="{'invisible':[('bandera_cortesuprema','=',False)]}">
+                            <group>
+                                <separator colspan="2" string="Conciliaciones"/>
+                                <field name="conciliacion_corte"  attrs="{'readonly':[('state','!=','cortesuprema')]}"/>
+                                <field name="text_cociliacion_corte" style="white-space: normal;word-break: break-word;" attrs="{'invisible':[('conciliacion_corte','=',False)],'required':[('conciliacion_corte','=',True)]}"/>
+                                <field name="adjunto_conciliacion_corte" filename="adjunto_conciliacion_corte_filename" attrs="{'invisible':[('conciliacion_corte','=',False)],'required':[('conciliacion_corte','=',True)]}"/>
+                                <field name="adjunto_conciliacion_corte_filename" invisible="1"/>
+                            </group>
+                            <group>
+                                <!-- <separator colspan="2" string="Ingreso de Recursos"/> -->
+                                <h4 colspan="2" class="text-primary">Ingreso de Recursos</h4>
+                                <field name="fecha_ingreso_recurso_corte" attrs="{'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','ingreso_recurso_corte')] ,'readonly':[('state_corte','!=','ingreso_recurso_corte')]}"/>  
+                            </group>
+                            <group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary" >Comentarios</h5>
+                                    <field name="text_ingreso_recurso_corte_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'required':[('state','=','cortesuprema'),('state_corte','=','ingreso_recurso_corte')] ,'readonly':[('state_corte','!=','ingreso_recurso_corte')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','cortesuprema'),('parent.state_corte','!=','ingreso_recurso_corte')]}"/>         
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary">Adjuntos</h5>
+                                    <field name="adj_ingreso_recurso_corte_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'required':[('state','=','cortesuprema'),('state_corte','=','ingreso_recurso_corte')] ,'readonly':[('state_corte','!=','ingreso_recurso_corte')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','cortesuprema'),('parent.state_corte','!=','ingreso_recurso_corte')]}"/>         
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group attrs="{'invisible':[('state_corte','not in',['auto_relacion_corte','inclusion_tabla_corte','sentencia_final'])]}">
+                                <!-- <separator colspan="2" string="Autos en Relación" attrs="{'invisible':[('state_corte','not in',['auto_relacion_corte','inclusion_tabla_corte','sentencia_final'])]}"/> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':[('state_corte','not in',['auto_relacion_corte','inclusion_tabla_corte','sentencia_final'])]}">Autos en Relación</h4>
+                                <group>
+                                    <separator colspan="2" string="Comentarios" attrs="{'invisible':[('state_corte','not in',['auto_relacion_corte','inclusion_tabla_corte','sentencia_final'])]}"/>
+                                    <field name="text_auto_relacion_corte_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':[('state_corte','not in',['auto_relacion_corte','inclusion_tabla_corte','sentencia_final'])],'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','auto_relacion_corte')] ,'readonly':[('state_corte','!=','auto_relacion_corte')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','cortesuprema'),('parent.state_corte','!=','auto_relacion_corte')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <separator colspan="2" string="Adjuntos" attrs="{'invisible':[('state_corte','not in',['auto_relacion_corte','inclusion_tabla_corte','sentencia_final'])]}"/>
+                                    <field name="adj_auto_relacion_corte_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':[('state_corte','not in',['auto_relacion_corte','inclusion_tabla_corte','sentencia_final'])],'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','auto_relacion_corte')] ,'readonly':[('state_corte','!=','auto_relacion_corte')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','cortesuprema'),('parent.state_corte','!=','auto_relacion_corte')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group>
+                                <!-- <separator colspan="2" string="Causa en Tabla" attrs="{'invisible':[('state_corte','not in',['inclusion_tabla_corte','sentencia_final'])]}"/>  -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':[('state_corte','not in',['inclusion_tabla_corte','sentencia_final'])]}">Causa en Tabla</h4>
+                                <field name="fecha_tabla_corte" attrs="{'readonly':[('state','!=','cortesuprema')],'invisible':[('state_corte','not in',['inclusion_tabla_corte','sentencia_final'])],'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','inclusion_tabla_corte')]}"/>  
+                            </group>
+                            <group attrs="{'invisible':[('state_corte','not in',['inclusion_tabla_corte','sentencia_final'])]}">
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':[('state_corte','not in',['inclusion_tabla_corte','sentencia_final'])]}">Comentarios</h5> 
+                                    <field name="text_inclusion_tabla_corte_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'readonly':[('state','!=','cortesuprema')],'invisible':[('state_corte','not in',['inclusion_tabla_corte','sentencia_final'])],'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','inclusion_tabla_corte')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','!=','cortesuprema')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':[('state_corte','not in',['inclusion_tabla_corte','sentencia_final'])]}">Adjuntos</h5> 
+                                    <field name="adj_inclusion_tabla_corte_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'readonly':[('state','!=','cortesuprema')],'invisible':[('state_corte','not in',['inclusion_tabla_corte','sentencia_final'])],'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','inclusion_tabla_corte')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': [('parent.state','!=','cortesuprema')]}"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                            <group>
+                                <!-- <separator colspan="2" string="Sentencia" attrs="{'invisible':[('state_corte','!=','sentencia_final')]}"/> -->
+                                <h4 colspan="2" class="text-primary" attrs="{'invisible':[('state_corte','!=','sentencia_final')]}">Sentencia</h4>
+                                <field name="cumplir_sentencia_corte" attrs="{'invisible':[('state_corte','!=','sentencia_final')],'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','sentencia_final')] ,'readonly':[('state','!=','cortesuprema')]}"/>
+                            </group>
+                            <group  attrs="{'invisible':[('state_corte','!=','sentencia_final')]}">                                
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':[('state_corte','!=','sentencia_final')]}">Comentarios</h5>
+                                    <field name="text_sentencia_final_ids" style="max-width: 95%;"  colspan="2" nolabel="1" attrs="{'invisible':[('state_corte','!=','sentencia_final')],'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','sentencia_final')] ,'readonly':[('state','!=','cortesuprema')]}">
+                                        <tree editable="bottom" delete="false"  >
+                                            <field name="comentario" style="white-space: pre-line; word-wrap: break-word;"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','cortesuprema'),('parent.state_corte','!=','sentencia_final')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group>
+                                    <h5 colspan="2" class="text-primary" attrs="{'invisible':[('state_corte','!=','sentencia_final')]}">Adjunto</h5>
+                                    <field name="adj_sentencia_final_ids" style="max-width: 95%;"  nolabel="1" colspan="2" attrs="{'invisible':[('state_corte','!=','sentencia_final')],'required':[('conciliacion_corte','=',False),('state','=','cortesuprema'),('state_corte','=','sentencia_final')] ,'readonly':[('state','!=','cortesuprema')]}">
+                                        <tree editable="bottom" delete="false" >
+                                            <field name="adjunto" widget="binary" filename="adjunto_filename"/>
+                                            <field name="create_date" widget="date" string="Fecha"/>
+                                            <field name="create_uid" string="Usuario"/>
+                                            <field name="adjunto_filename" invisible="1"/>
+                                            <button string="Borrar" name="unlink" confirm="¿Esta Seguro?" type="object" class="btn-primary" attrs="{'column_invisible': ['|',('parent.state','!=','cortesuprema'),('parent.state_corte','!=','sentencia_final')]}" />
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Cumplimiento" attrs="{'invisible':[('state','not in',['cumplimiento','finalizado','cancelado'])] }">
+                            <group>
+                                <group>
+                                    <separator colspan="2" string="Periodo de inicio (*opcional)"/>
+                                    <field name="cumplimiento_tiempo"/>
+                                    <field name="fecha_inicio_cumplimiento" attrs="{'required':[('cumplimiento_tiempo','=',True),('state','=','cumplimiento')],'invisible':[('cumplimiento_tiempo','=',False)]}"/>
+                                    <field name="text_comentario_cumplimiento" style="white-space: normal;word-break: break-word;" attrs="{'required':[('cumplimiento_tiempo','=',True),('state','=','cumplimiento')],'invisible':[('cumplimiento_tiempo','=',False)]}"/>
+                                    
+                                    <separator colspan="2" string="Periodo de termino" attrs="{'invisible':[('cumplimiento_tiempo','=',False)]}"/>
+                                    <field name="cumplimiento_termino" attrs="{'invisible':[('cumplimiento_tiempo','=',False)]}"/>
+                                    <field name="fecha_termino_cumplimiento" attrs="{'required':[('cumplimiento_termino','=',True),('state','=','cumplimiento')],'invisible':[('cumplimiento_termino','=',False)]}"/>
+                                    <field name="text_comentario_termino" style="white-space: normal;word-break: break-word;" attrs="{'required':[('cumplimiento_termino','=',True),('state','=','cumplimiento')],'invisible':[('cumplimiento_termino','=',False)]}"/>
+                                </group>
+                                <group >
+                                    <separator colspan="2" string="Completado"/>
+                                    <field name="sentencia_cumplida"/>
+                                    <field name="txt_sentencia_cumplida" style="white-space: normal;word-break: break-word;" attrs="{'invisible':[('sentencia_cumplida','=',False)],'required':[('sentencia_cumplida','=',True),('state','=','cumplimiento')]}"/>
+                                    
+                                </group>
+                            </group>
+
+                        </page>
+                        <page string="Usuario">
+                            <group>
+                                <field name="usuario_ids"  widget="many2many_tags" options="{'no_create':True, 'no_open':True}" > 
+                                    <tree >
+                                        <field name="name"/>
+                                        <field name="department_id"/>
+                                        <field name="company_id"/>
+                                        <field name="email"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page> 
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+
+    <record id="view_legal_juicio_new_tree" model="ir.ui.view">
+        <field name="name">view.legal.juicio.tree</field>
+        <field name="model">legal.juicio</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="numero_juicio" />
+                <field name="tipo_de_juicio"/>
+                <field name="tipo_laboral" string="Tipo Laboral"/>
+                <field name="create_date"/>
+                <field name="fecha_juicio"/>
+                <field name="peticion_juicio"/>
+                <field name="state" widget="badge" decoration-muted="state == 'borrador'" decoration-success="state == 'primera'" decoration-primary="state == 'segunda'" decoration-warning="state == 'cortesuprema'" decoration-info="state == 'cumplimiento'" decoration-danger="state == 'finalizado'" decoration-bf="state == 'cancelado'"/>
+            </tree>
+        </field>
+    </record>
+
+
+
+    <record id="view_legal_juicio_search" model="ir.ui.view"> 
+        <field name="name">view.legal.juicio.search</field>
+        <field name="model">legal.juicio</field>
+        <field name="arch" type="xml">
+            <search>
+                <!-- buscador escritura-->
+                <field name="name"/>
+                <field name="numero_juicio"/>
+                <field name="peticion_juicio" />
+                <field name="state"/>
+                <!-- <field name="company_id"/> -->
+
+                <!-- buscador categoria filter--> 
+                <filter string="Estado: Borrador" name="state_borrador" domain="[('state','=','borrador')]" />
+                <filter string="Estado: Primera Instancia" name="state_primera" domain="[('state','=','primera')]" />
+                <filter string="Estado: Corte de Apelaciones" name="state_segunda" domain="[('state','=','segunda')]" />
+                <filter string="Estado: Corte Suprema" name="state_corte" domain="[('state','=','cortesuprema')]" />
+                <filter string="Estado: Cumplimiento" name="state_cumplimiento" domain="[('state','=','cumplimiento')]" />
+                <filter string="Estado: Finalizado" name="state_finalizado" domain="[('state','=','finalizado')]" />
+                <filter string="Estado: Cancelado" name="state_cancelado" domain="[('state','=','cancelado')]" />
+                <filter string="default" name="filter_activo" domain="[('state','not in',['finalizado','cancelado'])]" />
+                <separator />
+                <filter string="Juicio Civil" name="filter_civil" domain="[('tipo_de_juicio','=','civil')]" />
+                <filter string="Juicio Laboral" name="filter_laboral" domain="[('tipo_de_juicio','=','laboral')]" />
+                <filter string="Juicio Juzgado De Policía Local (JPL)" name="filter_jpl" domain="[('tipo_de_juicio','=','JPL')]" />
+                <separator />
+                <filter string="Demandante" name="filter_demandate" domain="[('peticion_juicio','=','demandate')]" />
+                <filter string="Demandado" name="filter_demandado" domain="[('peticion_juicio','=','demandado')]" />           
+                <separator />
+                <filter string="Tipo Laboral: Monitorio" name="filter_monitorio" domain="[('tipo_laboral','=','monitorios')]" />
+                <filter string="Tipo Laboral: Apelación General" name="filter_apelacion" domain="[('tipo_laboral','=','apelacion')]" />
+ 
+                
+                <!-- buscador  por agrupaciones -->
+                <group  string="Group By">
+
+                    <filter string="Reconvención" name="by_es_reconvencion" context="{'group_by':'es_reconvencion'}"/>
+                    <filter string="Rol" name="by_peticion_juicio" context="{'group_by':'peticion_juicio'}"/>
+                    <separator />
+                    <filter string="Estado" name="by_estado" context="{'group_by':'state'}"/>
+                    <separator />
+                    <filter string="Fecha de creación" name="by_create_date" context="{'group_by':'create_date'}"/>
+                    <separator />
+                    <filter string="Tipo de juicio" name="by_tipo_de_juicio" context="{'group_by':'tipo_de_juicio'}"/>
+                    <separator/>
+                    <filter string="Tipo Laboral" name="by_tipo_laboral" context="{'group_by':'tipo_laboral'}"/>
+
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- <record model="ir.ui.view" id="view_attachment_tree_inherit">
+        <field name="name">view.attachment.tree.inherit</field>
+        <field name="model">ir.attachment</field>
+        <field name="inherit_id" ref="base.view_attachment_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='type']" position='after'>
+                <field name="size" />
+            </xpath>
+        </field>
+    </record> -->
+
+</odoo>

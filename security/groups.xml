@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data noupdate="0">
+	    
+    	<record id="legal_contrato_category" model="ir.module.category">
+			<field name="name">Control legal</field>
+		</record>
+    
+
+		<record id="legal_contrato_group_lector" model="res.groups">		
+			<field name="category_id" ref="l10n_cl_legal_contratos.legal_contrato_category"/>
+			<field name="name">Usuario Permitido : Lector</field>		
+		</record> 
+       
+        <record id="legal_contrato_group_admin" model="res.groups">     
+            <field name="category_id" ref="l10n_cl_legal_contratos.legal_contrato_category"/>
+            <field name="name">Usuario Editor : Registrar documentación </field>     
+            <field name="implied_ids" eval="[(4,ref('l10n_cl_legal_contratos.legal_contrato_group_lector'))]"/>
+     
+        </record>
+		
+
+	</data> 
+</odoo>
