@@ -168,6 +168,149 @@ class ControlContrato(models.Model):
         if self.adjunto_compraventa_final:
             self.check_file(file_name=self.adjunto_compraventa_filename)
 
+    @api.constrains('rut_contraparte')
+    def _valida_rut(self):
+        for re in self:
+            if re.rut_contraparte:
+                valid_rut = re.rut_contraparte
+                valid_rut = valid_rut.replace('-', '').replace('.', '').replace(',', '')
+            if valid_rut:
+                rut = valid_rut[:-1]
+                valor = rut.isdigit()
+                if not valor:
+                    raise ValidationError('El rut es inválido')
+                digito = valid_rut[-1]
+                if digito == 'k' or digito == 'K':
+                    digito = 10
+                
+                valida_digito = 11 - sum([int(a) * int(b) for a, b in zip(str(rut).zfill(8), '32765432')]) % 11
+                if valida_digito == 11:
+                    valida_digito = 0
+                if not (str(digito) == str(valida_digito)):
+                    raise ValidationError('El rut es inválido')
+
+    @api.onchange('tiene_plazofijo')
+    def _onchange_tiene_plazofijo(self):
+        if self.tiene_plazofijo:
+            pass
+        else:
+            self.fecha_vencimiento = None
+
+    @api.onchange('duracion_contrato')
+    def _onchange_duracion_contrato(self):
+        if self.duracion_contrato:
+            if self.duracion_contrato == "mensual":
+                self.tiene_plazofijo = True
+            else: 
+                self.tiene_plazofijo = False
+               
+    @api.onchange('tipo_de_contrato') 
+    def _onchange_tipo_de_contrato(self):
+        if self.tipo_de_contrato:
+            validacion_tipo_contrato = ["servidumbre","prestacion de servicios","arrendamiento"]
+            if self.tipo_de_contrato not in  validacion_tipo_contrato:
+                self.solicitud_de_termino = False
+            if self.tipo_de_contrato != "obra":
+                self.finalizacion_obra =False
+            if self.tipo_de_contrato != "compraventa/promesa":
+                self.finalizacion_compraventa = False
+
+    @api.onchange('contrato_indefinido')
+    def _onchange_contrato_indefinido(self):
+        if self.contrato_indefinido:
+            self.tiene_plazofijo = False
+
+    @api.onchange('fecha_vencimiento')
+    def _onchange_fecha_vencimiento(self):
+        if self.fecha_vencimiento:
+            timezone_user = self._context.get('tz') or self.env.user.partner_id.tz or 'UTC'
+            tz = timezone(timezone_user)
+            fecha_hora_actual = datetime.now(tz=tz) 
+
+            if self.fecha_vencimiento and self.tiene_plazofijo:
+                if self.fecha_inicio and self.fecha_recepcion:
+                    if self.fecha_vencimiento <= self.fecha_inicio:
+                        self.fecha_vencimiento = None
+                        raise UserError(f"La fecha no puede ser posterior a {self.fecha_inicio.strftime('%d-%m-%Y')}")
+                    if self.fecha_vencimiento <= fecha_hora_actual.date(): 
+                        mensaje = f"Se recomienda no usar fechas posteriores a la fecha actual {fecha_hora_actual.date().strftime('%d-%m-%Y')}."
+                        return {'warning': {'title': 'Advertencia', 'message': mensaje}}
+                else:
+                    self.fecha_vencimiento = None
+                    raise UserError("Verifique el ingreso de las siguiente fechas: \n Fecha de Inicio del contrato \n Fecha de recepción del contrato")
+    
+    @api.onchange('fecha_recordatorio')
+    def _onchange_fecha_recordatorio(self):
+        if self.fecha_recordatorio:
+            timezone_user = self._context.get('tz') or self.env.user.partner_id.tz or 'UTC'
+            tz = timezone(timezone_user)
+            fecha_hora_actual = datetime.now(tz=tz) 
+            for rec in self:
+                if not rec.fecha_inicio :
+                    raise UserError("verifique :\n -Fecha de incio del contrato.")
+                
+                if not rec.tipo_de_contrato :
+                    raise UserError("verifique la selección de : \n -Tipo de contrato.")
+                
+                if rec.tiene_plazofijo and not rec.fecha_vencimiento:
+                    raise UserError("verifique  : \n -fecha de vencimiento del contrato.")
+                
+                if rec.fecha_recordatorio <= fecha_hora_actual.date() :
+                    rec.fecha_recordatorio = None
+                    raise UserError(f"Solo puedes agregar fechas antes de la actual:\n {fecha_hora_actual.date().strftime('%d-%m-%Y')} ")
+              
+    @api.onchange('activar_recordatorio')
+    def _onchange_activar_recordatorio(self):
+        if self.activar_recordatorio:
+            pass
+        else:
+            self.fecha_recordatorio = None
+
+    def boton_revision(self):
+        if not self.contrato_borrador:
+            raise UserError(f"Agrege documento inicial para cambiar al siguente estado")
+        else:
+            self.state =  'revision'
+    def boton_firmados(self):
+        if not self.contrato_borrador or not self.contrato_revision:
+            raise UserError(f"Confirme que los documentos esten adjuntados,\n Antes de cambiar el estado.")
+        else:
+            self.state =  'firmados'
+    def boton_vigente(self):
+        if not self.contrato_borrador or not self.contrato_revision or not self.contrato_firmados:
+            raise UserError(f"Confirme que los documentos esten adjuntados,\n Antes de cambiar el estado.")
+        else:
+            self.state =  'vigente'
+    def boton_vencido(self):
+        if self.tipo_de_contrato == "arrendamiento" or not self.tiene_plazofijo or self.contrato_indefinido:
+            raise UserError("No se puede pasar al estado de vencido : \n -El tipo de contrato es de 'Arrendamiento'\n -El contrato NO tiene un plazo fijo \n -El contrato es INDIFINIDO")
+        if not self.contrato_borrador or not self.contrato_revision or not self.contrato_firmados:
+            raise UserError(f"Confirme que los documentos esten adjuntados,\n Antes de cambiar el estado.")
+        else:
+            self.state =  'vencido'
+
+    def boton_finalizado(self):
+        validacion_tipo_contrato = ["servidumbre","prestacion de servicios","arrendamiento"]
+        if self.tipo_de_contrato in  validacion_tipo_contrato  and not self.solicitud_de_termino:
+            raise UserError("Se requiere datos de Expiración")
+        if self.tipo_de_contrato == "obra" and not self.finalizacion_obra:
+            raise UserError("Se requiere datos de Expiración")
+        if self.tipo_de_contrato == "compraventa/promesa" and not self.finalizacion_compraventa:
+            raise UserError("Se requiere datos de Expiración")
+        if not self.contrato_borrador or not self.contrato_revision or not self.contrato_firmados:
+            raise UserError(f"Confirme que los documentos esten adjuntados,\n Antes de cambiar el estado.")
+        else:
+            self.state =  'finalizado'
+   
+    def boton_cancelado(self):
+        self.write({'state': 'cancelado'})
+        return True
+     
+    
+    def boton_borrador(self):
+        self.write({'state': 'borrador'})
+        return True
+
     def check_file(self,file_name):
         if str(file_name.split(".")[1]) != 'pdf' :
                 raise ValidationError("No puedes subir archivos diferente a (.pdf)")
@@ -187,6 +330,15 @@ class ControlContrato(models.Model):
                     grupo_lector.write({'users': [(4, user.id)]})
         return super(ControlContrato, self).write(values)
     
+    def validate_recordador(self):
+        timezone_user = self._context.get('tz') or self.env.user.partner_id.tz or 'UTC'
+        tz = timezone(timezone_user)
+        fecha_hora_actual = datetime.now(tz=tz) 
+        for res in self:
+            if res.fecha_recordatorio == fecha_hora_actual.date():
+                res.envio_recordatorio()
+
+
     def send_mail(self,  company=None):
         """ envio email """
         group_ref = None
@@ -274,111 +426,61 @@ class ControlContrato(models.Model):
             _logger.error(e)
             raise ValidationError("Error al enviar el correo : "+ e)
     
-   
-
-    @api.constrains('rut_contraparte')
-    def _valida_rut(self):
-        for re in self:
-            if re.rut_contraparte:
-                valid_rut = re.rut_contraparte
-            if valid_rut:
-                rut = valid_rut[:-1]
-                valor = rut.isdigit()
-                if not valor:
-                    raise ValidationError('El rut es inválido')
-                digito = valid_rut[-1]
-                if digito == 'k' or digito == 'K':
-                    digito = 10
-                rut = rut.replace('-', '').replace('.', '').replace(',', '')
-                valida_digito = 11 - sum([int(a) * int(b) for a, b in zip(str(rut).zfill(8), '32765432')]) % 11
-                if valida_digito == 11:
-                    valida_digito = 0
-                if not (str(digito) == str(valida_digito)):
-                    raise ValidationError('El rut es inválido')
                 
-    @api.onchange('tiene_plazofijo')
-    def _onchange_tiene_plazofijo(self):
-        if self.tiene_plazofijo:
-            pass
-        else:
-            self.fecha_vencimiento = None
 
-    @api.onchange('duracion_contrato')
-    def _onchange_duracion_contrato(self):
-        if self.duracion_contrato:
-            if self.duracion_contrato == "mensual":
-                self.tiene_plazofijo = True
-            else: 
-                self.tiene_plazofijo = False
-               
-    @api.onchange('tipo_de_contrato') 
-    def _onchange_tipo_de_contrato(self):
-        if self.tipo_de_contrato:
-            validacion_tipo_contrato = ["servidumbre","prestacion de servicios","arrendamiento"]
-            if self.tipo_de_contrato not in  validacion_tipo_contrato:
-                self.solicitud_de_termino = False
-            if self.tipo_de_contrato != "obra":
-                self.finalizacion_obra =False
-            if self.tipo_de_contrato != "compraventa/promesa":
-                self.finalizacion_compraventa = False
-   
 
-    @api.constrains('fecha_vencimiento')
-    def _constrains_fecha_vencimiento(self):
-        if self.tipo_de_contrato == "arrendamiento" and self.duracion_contrato == "anual":
-            self.fecha_vencimiento =  self.fecha_inicio + timedelta(days=365)
+    def envio_recordatorio(self,  company=None):
+        """ envio email """
+        group_ref = None
+        group_ref = self.sudo().env.ref('l10n_cl_legal_contratos.legal_contrato_group_admin')
+        #happy_birthday_template = self.sudo().env.ref('l10n_cl_controllegal.controllegal_group_admin_email')
+        happy_birthday_template = self.sudo().env.ref('l10n_sanitaria_inet.sanitaria_inet_happy_birthday_email')
+        assert happy_birthday_template._name == 'mail.template'
 
-    @api.onchange('contrato_indefinido')
-    def _onchange_contrato_indefinido(self):
-        if self.contrato_indefinido:
-            self.tiene_plazofijo = False
-        
-    @api.onchange('fecha_vencimiento')
-    def _onchange_fecha_vencimiento(self):
-        if self.fecha_vencimiento:
-            timezone_user = self._context.get('tz') or self.env.user.partner_id.tz or 'UTC'
-            tz = timezone(timezone_user)
-            fecha_hora_actual = datetime.now(tz=tz) 
+        email_to = ''
+        timezone_user = self._context.get('tz') or self.env.user.partner_id.tz or 'UTC'
+        tz = timezone(timezone_user)
+        self_tz = self.with_context(tz=timezone_user)
+        fecha_texto = fields.Datetime.context_timestamp(self_tz, datetime.now()).strftime('%d/%m/%Y')
+        # agregar apartado para diferenciar recordatorio vs los q estan por vencer 
+        # evaluar los dias que estan por vencer si este no se aproxima a los 30 es un recordatorio 
+        subject = f'Notificación Recordatorio. {fecha_texto}'
+        message = ''
+        texto_base = f'El siguiente contrato tiene un recordatorio:'
 
-            if self.fecha_vencimiento and self.tiene_plazofijo:
-                if self.fecha_inicio and self.fecha_recepcion:
-                    if self.fecha_vencimiento <= self.fecha_inicio:
-                        self.fecha_vencimiento = None
-                        raise UserError(f"La fecha no puede ser posterior a {self.fecha_inicio.strftime('%d-%m-%Y')}")
-                    if self.fecha_vencimiento <= fecha_hora_actual.date(): 
-                        mensaje = f"Se recomienda no usar fechas posteriores a la fecha actual {fecha_hora_actual.date().strftime('%d-%m-%Y')}."
-                        return {'warning': {'title': 'Advertencia', 'message': mensaje}}
-                else:
-                    self.fecha_vencimiento = None
-                    raise UserError("Verifique el ingreso de las siguiente fechas: \n Fecha de Inicio del contrato \n Fecha de recepción del contrato")
+        message += '<ul>'
+        for registro in self:
+            if not company:
+                company = registro.company_id
+            name = ''
+            if registro.name:
+                name = f'{registro.name}'
+            message += f'<li>Nombre: {name}</li>\n<li>Nº: {registro.numero_contrato}</li>\n<li>Fecha de recordatorio: {registro.fecha_recordatorio}</li>\n<li>Estatus: {registro.state}.</li>'
+        message += '</ul>'
+
+        if not company:
+            company = self.env.company
+
+        if group_ref:
+            for user in group_ref.users.filtered(lambda userx: company.id in userx.company_ids.ids):
+                if user.email:
+                    if not user.omitir_acciones:
+                        if email_to:
+                            email_to = f'{email_to},'
+                        email_to = f'{email_to}{user.email}'
+                                
+        email_values = {
+            'subject': subject,
+            'email_to': email_to,
+        }
+        ctx = {
+            'message': Markup(message),
+            'texto_base': Markup(texto_base)
+        }
+        company.enviar_email(happy_birthday_template, email_values, self.sudo(), data_extra=ctx)
+        return True   
+                
     
-    @api.onchange('fecha_recordatorio')
-    def _onchange_fecha_recordatorio(self):
-        if self.fecha_recordatorio:
-            timezone_user = self._context.get('tz') or self.env.user.partner_id.tz or 'UTC'
-            tz = timezone(timezone_user)
-            fecha_hora_actual = datetime.now(tz=tz) 
-            for rec in self:
-                if not rec.fecha_inicio :
-                    raise UserError("verifique :\n -Fecha de incio del contrato.")
-                
-                if not rec.tipo_de_contrato :
-                    raise UserError("verifique la selección de : \n -Tipo de contrato.")
-                
-                if rec.tiene_plazofijo and not rec.fecha_vencimiento:
-                    raise UserError("verifique  : \n -fecha de vencimiento del contrato.")
-                
-                if rec.fecha_recordatorio <= fecha_hora_actual.date() :
-                    rec.fecha_recordatorio = None
-                    raise UserError(f"Solo puedes agregar fechas antes de la actual:\n {fecha_hora_actual.date().strftime('%d-%m-%Y')} ")
-       
-        
-    @api.onchange('activar_recordatorio')
-    def _onchange_activar_recordatorio(self):
-        if self.activar_recordatorio:
-            pass
-        else:
-            self.fecha_recordatorio = None
 
 
     def get_file_all(self):
@@ -449,50 +551,7 @@ class ControlContrato(models.Model):
         
 
 
-    def boton_revision(self):
-        if not self.contrato_borrador:
-            raise UserError(f"Agrege documento inicial para cambiar al siguente estado")
-        else:
-            self.state =  'revision'
-    def boton_firmados(self):
-        if not self.contrato_borrador or not self.contrato_revision:
-            raise UserError(f"Confirme que los documentos esten adjuntados,\n Antes de cambiar el estado.")
-        else:
-            self.state =  'firmados'
-    def boton_vigente(self):
-        if not self.contrato_borrador or not self.contrato_revision or not self.contrato_firmados:
-            raise UserError(f"Confirme que los documentos esten adjuntados,\n Antes de cambiar el estado.")
-        else:
-            self.state =  'vigente'
-    def boton_vencido(self):
-        if self.tipo_de_contrato == "arrendamiento" or not self.tiene_plazofijo or self.contrato_indefinido:
-            raise UserError("No se puede pasar al estado de vencido : \n -El tipo de contrato es de 'Arrendamiento'\n -El contrato NO tiene un plazo fijo \n -El contrato es INDIFINIDO")
-        if not self.contrato_borrador or not self.contrato_revision or not self.contrato_firmados:
-            raise UserError(f"Confirme que los documentos esten adjuntados,\n Antes de cambiar el estado.")
-        else:
-            self.state =  'vencido'
-
-    def boton_finalizado(self):
-        validacion_tipo_contrato = ["servidumbre","prestacion de servicios","arrendamiento"]
-        if self.tipo_de_contrato in  validacion_tipo_contrato  and not self.solicitud_de_termino:
-            raise UserError("Se requiere datos de Expiración")
-        if self.tipo_de_contrato == "obra" and not self.finalizacion_obra:
-            raise UserError("Se requiere datos de Expiración")
-        if self.tipo_de_contrato == "compraventa/promesa" and not self.finalizacion_compraventa:
-            raise UserError("Se requiere datos de Expiración")
-        if not self.contrato_borrador or not self.contrato_revision or not self.contrato_firmados:
-            raise UserError(f"Confirme que los documentos esten adjuntados,\n Antes de cambiar el estado.")
-        else:
-            self.state =  'finalizado'
    
-    def boton_cancelado(self):
-        self.write({'state': 'cancelado'})
-        return True
-     
-    
-    def boton_borrador(self):
-        self.write({'state': 'borrador'})
-        return True
     
 class DocumentosExtrasContrato(models.Model):
     _name = "legal.contrato.adjuntos.extras"

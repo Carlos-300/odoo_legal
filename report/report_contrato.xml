@@ -125,8 +125,6 @@
                                                 </tr>
                                             </table>
 
-
-
                                         </div>
                                          <div class="col-6"> 
                               
@@ -147,6 +145,7 @@
                                                     <td class="pad_izquierda"><span t-field="o.departamento_id"/></td>
                                                 </tr>
                                                 <tr>
+
                                                     <td class="pad_izquierda">Responsable:</td>
                                                     <td class="pad_izquierda"><span t-field="o.responsable_id"/></td>
                                                 </tr>
