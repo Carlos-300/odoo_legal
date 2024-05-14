@@ -45,13 +45,12 @@
                       
                             <separator string="Fechas"/>
                             <field name="create_date" string="Fecha de ingreso al sistema"   widget="date"/>
-                            <field name="fecha_inicio" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])]}"/>
                             <field name="fecha_recepcion" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])]}"/>
+                            <field name="duracion_contrato"  attrs="{'readonly':[('state','not in','borrador')],'invisible':[('tipo_de_contrato','!=','arrendamiento')],'required':[('tipo_de_contrato','=','arrendamiento')]}" />
+                            <field name="fecha_inicio" attrs="{'readonly':[('state','not in',['borrador', 'revision' ])]}"/>
 
                             <field name="contrato_indefinido" attrs="{'invisible': [('tipo_de_contrato', 'not in', ['servidumbre', 'prestacion de servicios'])],'required': [('tipo_de_contrato', 'in', ['servidumbre', 'prestacion de servicios'])]}"/>
-                            
-                            <field name="duracion_contrato"  attrs="{'readonly':[('state','not in','borrador')],'invisible':[('tipo_de_contrato','!=','arrendamiento')],'required':[('tipo_de_contrato','=','arrendamiento')]}" />
-                            
+                        
                             <field name="tiene_plazofijo"  attrs="{'readonly':[('state','not in','borrador')],'invisible':[('contrato_indefinido','=', True)] }" />
                             <field name="fecha_vencimiento" attrs="{'readonly':[('state','not in',['borrador', 'revision'])],'required':[('tiene_plazofijo', '=', True)],'invisible':[('tiene_plazofijo', '=', False)] }"/>
                             

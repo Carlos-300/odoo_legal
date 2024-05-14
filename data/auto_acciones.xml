@@ -1,19 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <!-- <record id="auto_control_state" model="ir.cron" >
-        <field name="name">Control de contrato estados</field>
-        <field name="model_id" ref="model_legal_contrato"/>
-        <field name="interval_number">1</field>
-        <field name="interval_type">days</field>
-        <field name="nextcall" eval="(DateTime.now().replace(hour=4, minute=10) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')" />
-        <field name="numbercall">-1</field>
-        <field name="doall" eval="False"/>
-        <field name="state">code</field>
-        <field name="code">model.control_state()</field>
-    </record> -->
-
-    <record id="auto_control_mails" model="ir.cron" >
-        <field name="name">Control de contrato Emails</field>
+    <record id="auto_control_vencimientos" model="ir.cron" >
+        <field name="name">Control de contrato vencimientos</field>
         <field name="model_id" ref="model_legal_contrato"/>
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
@@ -22,6 +10,18 @@
         <field name="doall" eval="False"/>
         <field name="state">code</field>
         <field name="code">model.run_recordatorio()</field>
+    </record> 
+
+    <record id="auto_control_mails" model="ir.cron" >
+        <field name="name">Control de contrato Emails recordatorio</field>
+        <field name="model_id" ref="model_legal_contrato"/>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+        <field name="nextcall" eval="(DateTime.now().replace(hour=4, minute=10) + timedelta(days=1)).strftime('%Y-%m-%d %H:%M:%S')" />
+        <field name="numbercall">-1</field>
+        <field name="doall" eval="False"/>
+        <field name="state">code</field>
+        <field name="code">model.validate_recordador()</field>
     </record>
 
 </odoo>
